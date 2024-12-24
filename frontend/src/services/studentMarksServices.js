@@ -4,6 +4,7 @@ import api from "./api";
 export const studentMarksService = {
   // Add marks for a student
   addStudentMarks: async (marksData) => {
+    console.log('marksData in addStudentMarks', marksData)
     try {
       const response = await api.post("/student-marks", marksData);
       return response.data;
@@ -48,6 +49,7 @@ export const studentMarksService = {
 
   // Format marks data for API submission
   formatMarksData: (formData) => {
+    console.log('format marks data called formData', formData)
     return {
       marks: formData.subjects.map((subject) => ({
         subject: subject.subject,

@@ -4,10 +4,13 @@ import jsPDF from "jspdf";
 import { Download, X } from "lucide-react";
 
 const ResultModal = ({ student, onClose }) => {
+  console.log('student in result modal ', student)
   const resultRef = useRef(null);
 
   if (!student) return null;
-
+  const calculateTotalMarks = () => {
+    return student.marks.reduce((acc, mark) => acc + mark.mark, 0);
+  }
   const calculatePercentage = () => {
     const totalMarks = student.marks.reduce((acc, mark) => acc + mark.mark, 0);
     const maxMarks = student.marks.length * 100; // Assuming max marks is 100 for each subject
@@ -143,7 +146,7 @@ const ResultModal = ({ student, onClose }) => {
                       {student.marks.length * 100}
                     </td>
                     <td className="px-6 py-4 text-center font-semibold">
-                      {student.totalMarks}
+                      {calculateTotalMarks()}
                     </td>
                     <td className="px-6 py-4 text-center font-semibold">
                       <span
