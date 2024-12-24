@@ -193,7 +193,8 @@ exports.getTodayTimeTable = async (req, res) => {
 };
 exports.findFreeTeacher = async (req, res) => {
   try {
-    const { day, periodNumber } = req.body;
+    console.log('req.body in find free teachers', req.body)
+    const { day, periodNumber,classId="" } = req.body;
 
     // Validate input
     if (!day || !periodNumber) {
@@ -225,7 +226,7 @@ exports.findFreeTeacher = async (req, res) => {
     const freeTeachers = await Teacher.find({
       _id: { $nin: Array.from(assignedTeacherIds) }
     }).select("name subject");
-
+  console.log('freeTeachers', freeTeachers)
     return res.status(200).json({
       message: "Free teachers retrieved successfully.",
       freeTeachers,
