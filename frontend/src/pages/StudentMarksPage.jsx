@@ -18,15 +18,21 @@ const StudentMarksPage = () => {
   // Get unique classes from students
   const getUniqueClasses = (students) => {
     const classes = new Set(
-      students.map((student) => student.studentId.class.name)
+      students.map((student) => student.studentId?.class.name)
     );
     return Array.from(classes).sort((a, b) => parseInt(a) - parseInt(b));
   };
-
+  const calculatePercentage = (student) => {
+    console.log('student in calculatePercentage', student)
+    const totalMarks = student.marks.reduce((acc, mark) => acc + mark.mark, 0);
+    const maxMarks = student.marks.length * 100; // Assuming max marks is 100 for each subject
+    return ((totalMarks / maxMarks) * 100).toFixed(2);
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await studentMarksService.getAllStudentMarks();
+        console.log('response in StudentMarksPage', response )
         setStudents(response);
         setFilteredStudents(response);
         showToast("Student marks loaded successfully", "success");
@@ -46,7 +52,7 @@ const StudentMarksPage = () => {
       setFilteredStudents(students);
     } else {
       const filtered = students.filter(
-        (student) => student.studentId.class.name === className
+        (student) => student.studentId?.class.name === className
       );
       setFilteredStudents(filtered);
     }
@@ -100,7 +106,7 @@ const StudentMarksPage = () => {
                 Class
               </th>
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 border-b">
-                Total Marks
+                Persentage
               </th>
               <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 border-b">
                 Result
@@ -113,15 +119,15 @@ const StudentMarksPage = () => {
           <tbody className="divide-y divide-gray-200">
             {filteredStudents.map((student) => (
               <tr key={student._id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">{student.studentId.name}</td>
+                <td className="px-6 py-4">{student.studentId?.name}</td>
                 <td className="px-6 py-4">
-                  {student.studentId.registrationNumber}
+                  {student.studentId?.registrationNumber}
                 </td>
                 <td className="px-6 py-4">
-                  {student.studentId.class.name}-
-                  {student.studentId.class.section}
+                  {student.studentId?.class.name}-
+                  {student.studentId?.class.section}
                 </td>
-                <td className="px-6 py-4">{student.totalMarks} %</td>
+                <td className="px-6 py-4">{calculatePercentage(student)} %</td>
                 <td className="px-6 py-4">
                   <span
                     className={`px-2 py-1 rounded ${
