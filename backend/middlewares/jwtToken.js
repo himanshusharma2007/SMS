@@ -5,9 +5,7 @@ const studentModel = require("../models/studentModel");
 const Parents = require("../models/parentModels");
 
 const jwtToken = async (req, res, next) => {
-  console.log("jwtCalled");
   let token = req.cookies.token;
-  console.log(token);
   try {
     const decoded = jwt.verify(token, process.env.JWT_KEY);
     if (!decoded) {
@@ -25,7 +23,6 @@ const jwtToken = async (req, res, next) => {
         ? await studentModel.findById(decoded.id)
         : await Parents.findById(decoded.id);
 
-    console.log(userData);
     if (!userData) {
       return res.status(404).send({
         error: "User not found",

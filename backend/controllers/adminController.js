@@ -178,7 +178,8 @@ exports.addTeacher = async (req, res) => {
       return res.status(500).json({ error: "hash password failed" });
     }
 
-    if (leadClass) {
+    // Modified leadClass validation to allow empty string
+    if (leadClass && leadClass !== "") {
       if (!(await Class.findById(leadClass))) {
         console.log("Validation failed: Lead class not found");
         return res.status(400).json({ error: "Lead class not found" });
@@ -211,10 +212,10 @@ exports.addTeacher = async (req, res) => {
     const newTeacher = new Teachers({
       name,
       salary,
-      email, // Add this line
+      email,
       staffId: staff._id,
       subject,
-      leadClass,
+      leadClass: leadClass || null, // Set to null if empty string
       password: encryptPassword,
       registrationNumber: uId,
     });
@@ -251,7 +252,8 @@ exports.addTeacher = async (req, res) => {
                 console.log("Teacher assigned to class:", classData._id);
               }
             }
-            if (classData._id.equals(leadClass)) {
+            // Only set classTeacher if leadClass is not empty and matches
+            if (leadClass && leadClass !== "" && classData._id.equals(leadClass)) {
               classData.classTeacher = newTeacher._id;
             }
             await classData.save();
@@ -268,9 +270,9 @@ exports.addTeacher = async (req, res) => {
     console.log("Creating connection for new teacher...");
     await Connections.create({
       name: newTeacher.name,
-      email: staff.email, // Use staff.email instead of newTeacher.email
+      email: staff.email,
       profession: "teacher",
-      phoneNo: staff.phoneNo, // Use staff.phoneNo instead of newTeacher.phoneNo
+      phoneNo: staff.phoneNo,
     });
 
     const sendRegistrationMail = await sendEmail(
