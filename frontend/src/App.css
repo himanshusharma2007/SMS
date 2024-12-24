@@ -51,6 +51,7 @@ Global styles body {
 }
 
 /* Modal */
+/* General Modal Styling */
 .modal {
   position: fixed;
   top: 50%;
@@ -60,8 +61,8 @@ Global styles body {
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  width: 400px;
-  max-height: 700px;
+  min-width: 400px;
+  max-height: 600px;
   overflow-y: auto;
   z-index: 1000;
 }
@@ -72,26 +73,48 @@ Global styles body {
   text-align: center;
 }
 
-.modal form {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* Two equal columns */
-  gap: 20px;
+.form-main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-.modal label {
-  grid-column: span 2; /* Make labels span both columns */
+/* Input & Label Styles */
+label {
+  display: flex;
+  flex-direction: column;
+  width: calc(50% - 8px); /* Two inputs per row */
 }
 
-.modal input,
-.modal select {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+label input,
+label select {
+  padding: 8px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   font-size: 14px;
 }
 
-.modal .form-actions {
-  grid-column: span 2; /* Make action buttons span both columns */
+label select {
+  appearance: none;
+  cursor: pointer;
+}
+
+/* Photo Preview */
+.photo-preview {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.photo-preview img {
+  display: inline-block;
+  border: 1px solid #ccc;
+  padding: 2px;
+}
+
+/* Form Actions */
+.form-actions {
+  margin-top: 20px;
   display: flex;
   justify-content: space-between;
 }
@@ -105,6 +128,7 @@ Global styles body {
   cursor: pointer;
   margin: 0 5px;
   transition: background-color 0.2s ease;
+  max-width: 100px;
 }
 
 .modal .form-actions button:first-child {

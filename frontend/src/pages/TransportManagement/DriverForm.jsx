@@ -36,7 +36,8 @@ const DriverForm = ({ onClose, onSave, driver }) => {
     <div className="modal">
       <h2>{driver ? "Edit Driver" : "Add New Driver"}</h2>
       <form onSubmit={handleSubmit}>
-        <label>Name</label>
+        <div className="form-main">
+        <label>Name
 
         <input
           type="text"
@@ -45,8 +46,9 @@ const DriverForm = ({ onClose, onSave, driver }) => {
           onChange={handleChange}
           required
         />
+        </label>
 
-        <label>License Number</label>
+        <label>License Number
         <input
           type="text"
           name="license"
@@ -54,9 +56,10 @@ const DriverForm = ({ onClose, onSave, driver }) => {
           onChange={handleChange}
           required
         />
+        </label>
         
 
-        <label>Phone</label>
+        <label>Phone
         <input
           type="text"
           name="phone"
@@ -64,9 +67,10 @@ const DriverForm = ({ onClose, onSave, driver }) => {
           onChange={handleChange}
           required
         />
+        </label>
         
 
-        <label>Experience (in years)</label>
+        <label>Experience (in years)
         <input
           type="number"
           name="experience"
@@ -74,9 +78,10 @@ const DriverForm = ({ onClose, onSave, driver }) => {
           onChange={handleChange}
           required
         />
+        </label>
         
 
-        <label>Status</label>
+        <label>Status
         <select
           name="status"
           value={formData.status}
@@ -84,12 +89,14 @@ const DriverForm = ({ onClose, onSave, driver }) => {
           required
         >
           
+          
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
         </select>
+        </label>
         
 
-        <label>Upload Photo</label>
+        <label>Upload Photo
         <input
           type="file" 
           accept="image/*" 
@@ -105,6 +112,9 @@ const DriverForm = ({ onClose, onSave, driver }) => {
             />
           </div>
         )}
+        </label>
+        </div>
+
 
         <div className="form-actions">
           <button type="submit">Save</button>

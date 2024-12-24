@@ -51,8 +51,8 @@ const VehicleForm = ({ onClose, onSave, vehicle, availableRoutes, availableDrive
     <div className="modal">
       <h2>{vehicle ? "Edit Vehicle" : "Add New Vehicle"}</h2>
       <form onSubmit={handleSubmit}>
-       
-        <label>Model</label>
+      <div className="form-main">       
+        <label>Model
         <input
           type="text"
           name="model"
@@ -60,8 +60,9 @@ const VehicleForm = ({ onClose, onSave, vehicle, availableRoutes, availableDrive
           onChange={handleChange}
           required
         />
+        </label>
 
-        <label>Registration Number</label>
+        <label>Registration Number
         <input
           type="text"
           name="registration"
@@ -69,6 +70,7 @@ const VehicleForm = ({ onClose, onSave, vehicle, availableRoutes, availableDrive
           onChange={handleChange}
           required
         />
+        </label>
 
         
         {/* <label>Assigned Route</label>
@@ -86,7 +88,7 @@ const VehicleForm = ({ onClose, onSave, vehicle, availableRoutes, availableDrive
         </select> */}
 
 
-        <label>Assigned Driver</label>
+        <label>Assigned Driver
         <select
           name="driverAssigned"
           value={formData.driverAssigned}
@@ -99,19 +101,21 @@ const VehicleForm = ({ onClose, onSave, vehicle, availableRoutes, availableDrive
              </option>
            ))}
         </select>
+        </label>
 
         
 
-        <label>Insurance Expiry</label>
+        <label>Insurance Expiry
         <input
           type="date"
           name="insuranceExpiry"
           value={formData.insuranceExpiry}
           onChange={handleChange}
         />
+        </label>
         
 
-        <label>Capacity </label>
+        <label>Capacity 
         <input
           type="number"
           name="capacity"
@@ -119,9 +123,10 @@ const VehicleForm = ({ onClose, onSave, vehicle, availableRoutes, availableDrive
           onChange={handleChange}
           required
         />
+        </label>
        
 
-        <label>Fuel Type </label>
+        <label>Fuel Type 
         <select
           name="fuelType"
           value={formData.fuelType}
@@ -133,18 +138,18 @@ const VehicleForm = ({ onClose, onSave, vehicle, availableRoutes, availableDrive
           <option value="Electric">Electric</option>
           <option value="Hybrid">Hybrid</option>
         </select>
-       
+        </label>       
 
-        <label>Vechile color</label>
+        <label>Vechile color
         <input
           type="text"
           name="color"
           value={formData.color}
           onChange={handleChange}
         />  
-        
+        </label>        
 
-        <label>Status </label>
+        <label>Status 
         <select
           name="status"
           value={formData.status}
@@ -154,11 +159,9 @@ const VehicleForm = ({ onClose, onSave, vehicle, availableRoutes, availableDrive
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
         </select>
-       
+        </label>        
 
-        
-
-        <label>Year Of Manufacture </label>
+        <label>Year Of Manufacture 
         <input
           type="date"
           name="yearOfManufacture"
@@ -166,11 +169,9 @@ const VehicleForm = ({ onClose, onSave, vehicle, availableRoutes, availableDrive
           onChange={handleChange}
           placeholder="Year Of Manufacture"
         />
-       
+        </label>      
 
-       
-
-        <label>Ownership</label>
+        <label>Ownership
         <select
           name="ownership"
           value={formData.ownership}
@@ -180,9 +181,9 @@ const VehicleForm = ({ onClose, onSave, vehicle, availableRoutes, availableDrive
           <option value="self-owned">Self-Owned</option>
           <option value="leased">Leased</option>
         </select>
-        
+        </label>        
 
-        <label>Pollution Vaild Until</label>
+        <label>Pollution Vaild Until
         <input
           type="date"
           name="pollutionVaildUntil"
@@ -190,9 +191,10 @@ const VehicleForm = ({ onClose, onSave, vehicle, availableRoutes, availableDrive
           onChange={handleChange}
           placeholder="Polluction last date"
         />
+        </label>
         
 
-       <label>Last Service </label>
+       <label>Last Service 
         <input
           type="date"
           name="lastServiceDate"
@@ -200,9 +202,10 @@ const VehicleForm = ({ onClose, onSave, vehicle, availableRoutes, availableDrive
           onChange={handleChange}
           placeholder="last Service date"
         />
+        </label>
        
 
-        <label>Total KM</label>
+        <label>Total KM
         <input
           type="number"
           name="totalKm"
@@ -210,9 +213,10 @@ const VehicleForm = ({ onClose, onSave, vehicle, availableRoutes, availableDrive
           onChange={handleChange}
           placeholder="Last Day KM"
         />
+        </label>
         
 
-        <label>Today Maintenance Cost</label>
+        <label>Today Maintenance Cost
         <input
           type="number"
           name="maintenanceCost"
@@ -220,44 +224,49 @@ const VehicleForm = ({ onClose, onSave, vehicle, availableRoutes, availableDrive
           onChange={handleChange}
           placeholder="Today Maintenance Cost"
         />  
+        </label>
         
 
-        <label>Today Fuel Cost </label> 
+        <label>Today Fuel Cost 
         <input
           type="number"
           name="fuelCharge"
           value={formData.fuelCharge}
           onChange={handleChange}
           placeholder="Today Fuel Cost"
-        />  
+        /> 
+        </label>  
        
 
-        <label>Chassis Number</label>
+        <label>Chassis Number
         <input
           type="text"
           name="chassisNumber"
           value={formData.chassisNumber}
           onChange={handleChange}
         />  
+        </label>
          
 
-        <label>Engine Number</label>
+        <label>Engine Number
         <input
           type="text"
           name="engineNumber"
           value={formData.engineNumber}
           onChange={handleChange}
         />  
+        </label>
         
 
         <label>
-          Image:</label>
+          Image:
           <input 
             type="file" 
             accept="image/*" 
             onChange={handleFileChange} />
+            </label>
         
-
+        </div>
         <div className="form-actions">
           <button type="submit">Save</button>
           <button type="button" onClick={onClose}>
