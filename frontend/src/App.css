@@ -73,16 +73,13 @@ Global styles body {
 }
 
 .modal form {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two equal columns */
   gap: 20px;
 }
 
 .modal label {
-  margin-bottom: 5px;
-  font-size: 14px;
-  font-weight: 500;
+  grid-column: span 2; /* Make labels span both columns */
 }
 
 .modal input,
@@ -94,6 +91,7 @@ Global styles body {
 }
 
 .modal .form-actions {
+  grid-column: span 2; /* Make action buttons span both columns */
   display: flex;
   justify-content: space-between;
 }
