@@ -27,7 +27,7 @@ import { useToast } from "../../context/ToastContext";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
-  const [expandedGroups, setExpandedGroups] = useState([]);
+  const [expandedGroups, setExpandedGroups] = useState(["Main"]); // Default to the first group
   const location = useLocation();
   const showToast = useToast();
   const navigate = useNavigate();
@@ -55,11 +55,7 @@ const Sidebar = () => {
     const isActive = isGroupActive(groupRoutes);
 
     const handleToggle = () => {
-      setExpandedGroups((prevExpanded) =>
-        isExpanded
-          ? prevExpanded.filter((group) => group !== title)
-          : [...prevExpanded, title]
-      );
+      setExpandedGroups(isExpanded ? [] : [title]); // Only keep one group expanded
     };
 
     return (
@@ -165,8 +161,13 @@ const Sidebar = () => {
     </li>
   );
 
+  
+
+
+
   return (
     <div className="relative w-full">
+ <div className="relative w-full">
       {/* Mobile Overlay */}
       {!isOpen && (
         <div
@@ -341,7 +342,7 @@ const Sidebar = () => {
       >
         <FaBars className="w-6 h-6" />
       </button>
-    </div>
+    </div>    </div>
   );
 };
 
