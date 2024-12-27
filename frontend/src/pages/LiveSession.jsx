@@ -307,13 +307,14 @@ const LiveSessionManagement = () => {
               />
               <BsSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
-
+            {/* <Link to> */}
             <button
               onClick={() => setShowModal(true)}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
             >
               <MdAdd /> New Session
             </button>
+            {/* </Link> */}
           </div>
         </div>
       </div>
@@ -385,8 +386,9 @@ const LiveSessionManagement = () => {
       </div>
 
       {showModal && (
-        <div className="bg-white rounded-lg w-full max-w-2xl mx-4">
-          <div className="flex items-center justify-between p-6 border-b">
+        <div className="bg-gray-500 bg-opacity-50 w-[1150px] h-full absolute top-0 flex items-center justify-center"> 
+        <div className="bg-white rounded-lg w-full max-w-2xl">
+          <div className="flex items-center justify-between p-6 border-b ">
             <h2 className="text-xl font-semibold">
               {selectedSession ? "Edit Session" : "Create New Session"}
             </h2>
@@ -397,9 +399,10 @@ const LiveSessionManagement = () => {
               {/* <X className="w-6 h-6" /> */}
             </button>
           </div>
-
-          <form onSubmit={handleSubmit} className="p-6">
-            <div className="grid grid-cols-1 gap-6">
+          
+          <div className="max-h-[600px] overflow-y-scroll">
+          <form onSubmit={handleSubmit} className="p-6 ">
+            <div className="grid grid-cols-1 gap-6 ">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Session Title
@@ -563,6 +566,8 @@ const LiveSessionManagement = () => {
               </button>
             </div>
           </form>
+          </div>
+        </div>
         </div>
       )}
 
