@@ -86,7 +86,7 @@ const ClassList = () => {
           <TableBody>
             {classes.map((classItem) => (
               <TableRow key={classItem.id}>
-                <TableCell>{classItem.name}</TableCell>
+                <TableCell>{classItem.name}-{classItem.section}</TableCell>
                 <TableCell>{classItem.students.length}</TableCell>
                 <TableCell>
                   <Link 

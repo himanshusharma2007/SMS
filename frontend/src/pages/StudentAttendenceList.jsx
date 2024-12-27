@@ -27,6 +27,7 @@ const StudentAttendance = ({ setCurrentView }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [className, setClassName] = useState("")
+  const [classSection, setClassSection] = useState("")
 
   // Fetch students and attendance data
   useEffect(() => {
@@ -41,6 +42,7 @@ const StudentAttendance = ({ setCurrentView }) => {
         const studentsResponse = await StudentService.getStudentByClass(classId);
         console.log('studentsResponse', studentsResponse)
         setClassName(studentsResponse.data.class.name)
+        setClassSection(studentsResponse.data.class.section)
         
         // Fetch attendance data for the class
         const attendanceResponse = await StudentAttendanceService.getAllClassStudentAttendance(classId);
@@ -238,7 +240,7 @@ const StudentAttendance = ({ setCurrentView }) => {
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <h1 className="text-2xl font-bold text-gray-900">
-              Student Attendance - Class {className}
+              Student Attendance - Class {className}-{classSection}
             </h1>
             <DatePicker
               selected={selectedDate}
