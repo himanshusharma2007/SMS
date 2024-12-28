@@ -392,7 +392,7 @@ const AdmissionForm = () => {
                 classes.map((cls, index) => {
                   return (
                     <option key={index} value={cls._id}>
-                      {cls.name}
+                      {cls.name}-{cls.section}
                     </option>
                   );
                 })}
