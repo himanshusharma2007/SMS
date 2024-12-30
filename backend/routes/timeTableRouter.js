@@ -21,6 +21,6 @@ router.delete("/:id", jwtToken, checkAdmin, deleteTimeTable);
 router.get("/teacher/:teacherId", jwtToken, checkTeacher, getTeacherTimeTable);
 router.get("/today", jwtToken, getTodayTimeTable);
 router.get("/:id", jwtToken, getTimetableById);
-router.post("/find-free-teacher", jwtToken, findFreeTeacher);
+router.post("/find-free-teacher", jwtToken,checkAdmin, findFreeTeacher);
 
 module.exports = router;

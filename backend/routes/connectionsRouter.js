@@ -9,15 +9,16 @@ const {
 } = require("../controllers/connectionsController");
 const jwtToken = require("../middlewares/jwtToken");
 const checkAdmin = require("../middlewares/checkAdmin");
+const checkTeacher = require("../middlewares/checkTeacher");
 
 // Route to add a new connection
 router.post("/", jwtToken, checkAdmin, addConnection);
 
 // Route to get all connections
-router.get("/", jwtToken, getAllConnections);
+router.get("/", jwtToken, checkTeacher, getAllConnections);
 
 // Route to get a specific connection by ID
-router.get("/:id",jwtToken, getConnectionById);
+router.get("/:id",jwtToken, checkTeacher, getConnectionById);
 
 // Route to update a connection by ID
 router.put("/:id", jwtToken,checkAdmin, updateConnection);

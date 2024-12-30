@@ -95,7 +95,7 @@ exports.updateStaff = async (req, res) => {
     const { name, email, joinDate, phoneNo, salary, address, govId } = req.body;
 
     const staff = await Staff.findById(id);
-    if (!staff) {
+    if (!staff || !staff.isActive) {
       return res.status(404).json({ error: "Staff member not found" });
     }
 
@@ -124,7 +124,7 @@ exports.getStaff = async (req, res) => {
     const { id } = req.params;
     const staff = await Staff.findById(id).populate("department", "name");
 
-    if (!staff) {
+    if (!staff || !staff.isActive) {
       return res.status(404).json({ error: "Staff member not found" });
     }
 
@@ -136,7 +136,7 @@ exports.getStaff = async (req, res) => {
 
 exports.getAllStaff = async (req, res) => {
   try {
-    const staffs = await Department.find().populate("staffMembers");
+    const staffs = await Department.find({isActive: true}).populate("staffMembers");
     return res.status(200).json({ message: "get all staff", data: staffs });
   } catch (error) {
     return res.status(400).json({ error: error.message });
@@ -167,12 +167,15 @@ exports.deleteStaff = async (req, res) => {
 
     const department = await Department.findById(staff.department);
     if (department) {
+      if (department.name === "Administration") {
+        return res.status(400).json({ error: "Administration staff not delete directly" })
+      }
       department.staffMembers = department.staffMembers.filter(
         (staffId) => staffId.toString() !== id
       );
       await department.save();
     }
-    const deletedStaff = await Staff.findByIdAndDelete(id);
+    const deletedStaff = await Staff.findByIdAndUpdate(id, { isActive: false });
     if (deletedStaff) {
       return res.status(200).json({ message: "Staff deleted successfully" });
     }
@@ -190,7 +193,7 @@ exports.changeRole = async (req, res) => {
 
     // Find the staff member by ID
     const staff = await Staff.findById(id);
-    if (!staff) {
+    if (!staff || !staff.isActive) {
       return res.status(404).json({ error: "Staff member not found" });
     }
 

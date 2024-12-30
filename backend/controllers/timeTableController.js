@@ -205,16 +205,16 @@ exports.findFreeTeacher = async (req, res) => {
     // Find all teachers assigned to the specific period on the given day
     const assignedTeachers = await TimeTable.find({
       day,
-      periods: { 
-        $elemMatch: { 
-          periodNumber: periodNumber 
-        } 
+      periods: {
+        $elemMatch: {
+          periodNumber: periodNumber
+        }
       }
     }).select('periods');
 
     // Extract teacher IDs who are assigned during this specific period
     const assignedTeacherIds = new Set(
-      assignedTeachers.flatMap(timetable => 
+      assignedTeachers.flatMap(timetable =>
         timetable.periods
           .filter(period => period.periodNumber === periodNumber)
           .map(period => period.teacher.toString())
@@ -222,9 +222,7 @@ exports.findFreeTeacher = async (req, res) => {
     );
 
     // Find teachers who are not assigned during this period
-    const freeTeachers = await Teacher.find({
-      _id: { $nin: Array.from(assignedTeacherIds) }
-    }).select("name subject");
+    const freeTeachers = await Teacher.find({ _id: { $nin: Array.from(assignedTeacherIds) }, isActive: true }).select("name subject");
 
     return res.status(200).json({
       message: "Free teachers retrieved successfully.",
