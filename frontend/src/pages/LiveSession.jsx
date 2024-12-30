@@ -13,7 +13,7 @@ import { getAllClasses } from "../services/classService";
 import teacherService from "../services/teacherService";
 import getStudentByClass from "../services/studentServices";
 import { useToast } from "../context/ToastContext";
-
+import AddLiveSessionModal from "../modals/AddLiveSessionModal";
 const LiveSessionManagement = () => {
   const [sessions, setSessions] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
@@ -112,6 +112,16 @@ const LiveSessionManagement = () => {
     setFormData((prev) => ({ ...prev, students: selectedOptions }));
   };
 
+  const handleStatusChange = async (sessionId, status) => {
+    try {
+      await updateSessionStatus(sessionId, status);
+      showToast("Session status updated successfully", "success");
+      fetchSessions(); // Refresh the sessions list
+    } catch (err) {
+      setError(err.message);
+      showToast("Failed to update session status", "error");
+    }
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -323,6 +333,7 @@ const LiveSessionManagement = () => {
         {filteredSessions.map((session) => (
           <div key={session._id} className="p-6 border-b last:border-b-0">
             <div className="flex items-center justify-between">
+
               <div className="flex items-center gap-4">
                 <div className="bg-blue-100 p-3 rounded-full">
                   <MdVideoCall className="text-blue-600 text-xl" />
@@ -349,13 +360,18 @@ const LiveSessionManagement = () => {
               </div>
 
               <div className="flex items-center gap-4">
-                <span
-                  className={`px-3 py-1 rounded-full text-sm ${getStatusColor(
+                <select
+                  value={session.status}
+                  onChange={(e) => handleStatusChange(session._id, e.target.value)}
+                  className={`px-3 py-1 rounded-lg text-sm border ${getStatusColor(
                     session.status
                   )}`}
                 >
-                  {session.status}
-                </span>
+                  <option value="scheduled">Scheduled</option>
+                  <option value="ongoing">Ongoing</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
 
                 <div className="flex gap-2">
                   <button
@@ -385,185 +401,18 @@ const LiveSessionManagement = () => {
       </div>
 
       {showModal && (
-        <div className="bg-white rounded-lg w-full max-w-2xl mx-4">
-          <div className="flex items-center justify-between p-6 border-b">
-            <h2 className="text-xl font-semibold">
-              {selectedSession ? "Edit Session" : "Create New Session"}
-            </h2>
-            <button
-              // onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              {/* <X className="w-6 h-6" /> */}
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="p-6">
-            <div className="grid grid-cols-1 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Session Title
-                </label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows="3"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Session Link
-                </label>
-                <input
-                  type="url"
-                  name="sessionLink"
-                  value={formData.sessionLink}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Teacher
-                </label>
-                <select
-                  name="teacher"
-                  value={formData.teacher}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                >
-                  <option value="" disabled>
-                    Select a teacher
-                  </option>
-                  {teachers.map((teacher, index) => (
-                    <option key={index} value={teacher._id}>
-                      {teacher.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Class
-                </label>
-                <select
-                  name="class"
-                  value={formData.class}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                >
-                  <option value="" disabled>
-                    Select a class
-                  </option>
-                  {classes &&
-                    classes.map((cls) => (
-                      <option key={cls._id} value={cls._id}>
-                        {cls.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Students
-                </label>
-                <select
-                  multiple
-                  name="students"
-                  value={formData.students}
-                  onChange={handleStudentSelection}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                >
-                  {classStudents.length > 0 ? (
-                    classStudents.map((student) => (
-                      <option key={student._id} value={student._id}>
-                        {student.name}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>No students available</option>
-                  )}
-                </select>
-                <p className="text-sm text-gray-500 mt-1">
-                  Hold Ctrl/Cmd to select multiple students
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Start Time
-                  </label>
-                  <input
-                    type="datetime-local"
-                    name="startFrom"
-                    value={formData.startFrom}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Duration (minutes)
-                  </label>
-                  <input
-                    type="number"
-                    name="duration"
-                    value={formData.duration}
-                    onChange={handleInputChange}
-                    min="15"
-                    max="180"
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 flex justify-end gap-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowModal(false);
-                }}
-                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                {selectedSession ? "Update Session" : "Create Session"}
-              </button>
-            </div>
-          </form>
-        </div>
+        <AddLiveSessionModal
+          showModal={showModal}
+          onClose={() => setShowModal(false)}
+          selectedSession={selectedSession}
+          formData={formData}
+          handleInputChange={handleInputChange}
+          handleStudentSelection={handleStudentSelection}
+          handleSubmit={handleSubmit}
+          teachers={teachers}
+          classes={classes}
+          classStudents={classStudents}
+        />
       )}
 
       {/* Delete Confirmation Modal */}
