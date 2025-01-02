@@ -3,10 +3,19 @@ const Department = require("../models/departmentModels");
 const Admin = require("../models/adminModels");
 const { registrationEmail } = require("../utils/html/html");
 const generateUniqueId = require("../utils/generateId");
-
+const hashPassword = require("../utils/password");
+const sendEmail = require("../utils/sendMail");
+const Connections = require("../models/connectionModels");
 // Add a new staff member
 exports.addStaff = async (req, res) => {
   console.log("Received request to add staff:", req.body);
+  const departmentId=req.body.department;
+  const department = await Department.findById(departmentId);
+  if(!department){
+    console.log("Error: Department not found");
+    return res.status(400).json({ error: "Department not found" });
+  }
+  const departmentName=department.name
   try {
     const {
       name,
@@ -18,7 +27,6 @@ exports.addStaff = async (req, res) => {
       salary,
       govId,
       address,
-      departmentName,
     } = req.body;
 
     // Validation
@@ -92,7 +100,7 @@ exports.addStaff = async (req, res) => {
       department.staffMembers.push(staff._id);
 
       await newAdmin.save();
-      newAdmin.password = "********";
+      newAdmin.password = "****";
       const sendRegistrationMail = await sendEmail(
         staff.email,
         "Email for Login Id and password",
@@ -180,7 +188,7 @@ exports.getStaff = async (req, res) => {
 
 exports.getAllStaff = async (req, res) => {
   try {
-    const staffs = await Department.find({}).populate("staffMembers");
+    const staffs = await Department.find().populate("staffMembers");
     return res.status(200).json({ message: "get all staff", data: staffs });
   } catch (error) {
     return res.status(400).json({ error: error.message });
