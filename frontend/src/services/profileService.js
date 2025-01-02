@@ -6,8 +6,10 @@ const ProfileService = {
   async getProfile() {
     try {
       const response = await api.get("/profile");
+      console.log(response)
       return response.data;
     } catch (error) {
+      console.log(error)
       throw this.handleError(error);
     }
   },
