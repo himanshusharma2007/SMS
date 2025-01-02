@@ -8,6 +8,7 @@ import {
 } from "react-icons/pi";
 import { getAllParents, updateParent } from "../services/parentsServices";
 import { useToast } from "../context/ToastContext";
+import Loader from "../components/Loader/Loader";
 
 const ParentsPage = () => {
   const [parents, setParents] = useState([]);
@@ -226,10 +227,7 @@ const ParentsPage = () => {
 
         {/* Loading State */}
         {loading ? (
-          <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="mt-4 text-gray-500">Loading parents...</p>
-          </div>
+          <Loader />
         ) : (
           /* Parents Table */
           <div className="overflow-x-auto">

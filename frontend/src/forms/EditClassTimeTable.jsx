@@ -10,6 +10,8 @@ import {
   Box,
   Divider,
   Container,
+  CircularProgress,
+  Backdrop,
 } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
 import { getAllClasses, getClassById } from "../services/classService";
@@ -20,14 +22,19 @@ import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
+import Loader from "../components/Loader/Loader";
 
 const EditClassTimeTable = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const showToast = useToast();
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingClass, setIsLoadingClass] = useState(false);
+
   const [editTimeTable, setEditTimeTable] = useState({
-    classId: "", // Ensure this is an empty string initially
+    classId: "",
     day: "",
     periods: [
       {
@@ -54,6 +61,7 @@ const EditClassTimeTable = () => {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
+        setIsLoading(true);
         // Fetch all classes
         const classesResponse = await getAllClasses();
         setClasses(classesResponse.data);
@@ -68,8 +76,8 @@ const EditClassTimeTable = () => {
           periods: timetableResponse.periods.map((period) => ({
             periodNumber: period.periodNumber,
             subject: period.subject,
-            subjectId: period.subject, // Assuming subject is a string
-            teacher: period.teacher._id, // Assuming teacher is an object with _id
+            subjectId: period.subject,
+            teacher: period.teacher._id,
             startTime: convertTo24HourFormat(period.startTime),
             endTime: convertTo24HourFormat(period.endTime),
           })),
@@ -80,6 +88,8 @@ const EditClassTimeTable = () => {
         setClassSubjects(classData.data.subjects || []);
       } catch (error) {
         showToast(`Error fetching timetable: ${error.message}`, "error");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -88,9 +98,9 @@ const EditClassTimeTable = () => {
 
   const handleClassSelection = async (classId) => {
     try {
-      // Ensure classId is a string and not undefined
       if (!classId) return;
 
+      setIsLoadingClass(true);
       // Fetch full class details
       const classData = await getClassById(classId);
 
@@ -114,11 +124,12 @@ const EditClassTimeTable = () => {
       }));
     } catch (error) {
       showToast("Error fetching class details", "error");
+    } finally {
+      setIsLoadingClass(false);
     }
   };
 
   const handleSubjectSelection = (periodIndex, subject) => {
-    // Ensure subject exists before accessing its properties
     if (!subject) return;
 
     const newPeriods = [...editTimeTable.periods];
@@ -126,7 +137,7 @@ const EditClassTimeTable = () => {
       ...newPeriods[periodIndex],
       subject: subject.subjectName,
       subjectId: subject._id,
-      teacher: subject.teacher?._id || "", // Use optional chaining
+      teacher: subject.teacher?._id || "",
     };
 
     setEditTimeTable((prev) => ({
@@ -157,7 +168,6 @@ const EditClassTimeTable = () => {
   };
 
   const handleUpdateTimeTable = async () => {
-    console.log("editTimeTable", editTimeTable);
     // Validation checks
     if (!editTimeTable.classId) {
       showToast("Please select a class", "error");
@@ -177,7 +187,8 @@ const EditClassTimeTable = () => {
     }
 
     try {
-      // Prepare the payload to match the expected backend structure
+      setIsSubmitting(true);
+      // Prepare the payload
       const payload = {
         class: editTimeTable.classId,
         day: editTimeTable.day,
@@ -192,15 +203,18 @@ const EditClassTimeTable = () => {
 
       // Update the timetable
       await TimeTableService.updateTimeTable(id, payload);
-
       showToast("Timetable updated successfully", "success");
-
-      // Navigate back to previous page or timetable list
       navigate(-1);
     } catch (error) {
       showToast(`Error: ${error.message}`, "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -227,6 +241,7 @@ const EditClassTimeTable = () => {
                 fullWidth
                 value={editTimeTable.classId || ""}
                 onChange={(e) => handleClassSelection(e.target.value)}
+                disabled={isLoadingClass}
                 sx={{
                   backgroundColor: "background.paper",
                   "& .MuiOutlinedInput-notchedOutline": {
@@ -260,6 +275,7 @@ const EditClassTimeTable = () => {
                     day: e.target.value,
                   }))
                 }
+                disabled={isLoadingClass}
                 sx={{
                   backgroundColor: "background.paper",
                   "& .MuiOutlinedInput-notchedOutline": {
@@ -282,6 +298,15 @@ const EditClassTimeTable = () => {
               </Select>
             </Box>
           </Grid>
+
+          {/* Loading indicator for class selection */}
+          {isLoadingClass && (
+            <Grid item xs={12}>
+              <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
+                <CircularProgress size={24} />
+              </Box>
+            </Grid>
+          )}
 
           {/* Periods Section */}
           <Grid item xs={12}>
@@ -318,6 +343,7 @@ const EditClassTimeTable = () => {
                         );
                         handleSubjectSelection(index, selectedSubject);
                       }}
+                      disabled={isLoadingClass}
                       sx={{ backgroundColor: "background.paper" }}
                     >
                       {classSubjects.map((subject) => (
@@ -363,6 +389,7 @@ const EditClassTimeTable = () => {
                             periods: newPeriods,
                           }));
                         }}
+                        disabled={isLoadingClass}
                         sx={{ width: "100%" }}
                       />
                     </LocalizationProvider>
@@ -391,6 +418,7 @@ const EditClassTimeTable = () => {
                             periods: newPeriods,
                           }));
                         }}
+                        disabled={isLoadingClass}
                         sx={{ width: "100%" }}
                       />
                     </LocalizationProvider>
@@ -408,7 +436,9 @@ const EditClassTimeTable = () => {
                 color="secondary"
                 startIcon={<AddIcon />}
                 onClick={addPeriod}
-                disabled={!editTimeTable.classId}
+                disabled={
+                  !editTimeTable.classId || isLoadingClass || isSubmitting
+                }
                 sx={{
                   borderRadius: 2,
                   textTransform: "none",
@@ -421,19 +451,32 @@ const EditClassTimeTable = () => {
                 variant="contained"
                 color="primary"
                 onClick={handleUpdateTimeTable}
-                disabled={!editTimeTable.classId}
+                disabled={
+                  !editTimeTable.classId || isLoadingClass || isSubmitting
+                }
+                startIcon={
+                  isSubmitting && <CircularProgress size={20} color="inherit" />
+                }
                 sx={{
                   borderRadius: 2,
                   textTransform: "none",
                   px: 4,
                 }}
               >
-                Update Timetable
+                {isSubmitting ? "Updating..." : "Update Timetable"}
               </Button>
             </Box>
           </Grid>
         </Grid>
       </Paper>
+
+      {/* Backdrop loading for submission */}
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isSubmitting}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </Container>
   );
 };

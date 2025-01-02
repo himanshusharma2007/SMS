@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getAllClasses } from "../services/classService";
 import teacherService from "../services/teacherService";
 import { useToast } from "../context/ToastContext";
-
+import Loader from "../components/Loader/Loader";
 const Class = () => {
   const [classes, setClasses] = useState([]);
   const [teachersMap, setTeachersMap] = useState({});
@@ -78,11 +78,7 @@ const Class = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
+    return <Loader />;
   }
 
   if (error) {
