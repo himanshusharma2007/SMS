@@ -31,6 +31,7 @@ const Student = () => {
           StudentService.getAllStudents(),
           ClassService.getAllClasses(),
         ]);
+        console.log('studentsResponse.data', studentsResponse.data)
         setStudents(studentsResponse.data);
         setClasses(classesResponse.data);
         showToast("Student Loaded successfully", "success");
