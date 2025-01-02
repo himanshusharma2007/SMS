@@ -41,12 +41,6 @@ const liveSessionSchema = new mongoose.Schema({
   startFrom: {
     type: Date,
     required: [true, 'Start time is required'],
-    validate: {
-      validator: function(v) {
-        return v > new Date();
-      },
-      message: 'Start time must be in the future'
-    }
   },
   duration: {
     type: Number,

@@ -77,7 +77,7 @@ export const updateLiveSession = async (sessionId, updateData) => {
 export const updateSessionStatus = async (sessionId, status) => {
   console.log(`Updating status of live session (ID: ${sessionId}) to:`, status);
   try {
-    const response = await api.put(`/live-sessions/status/${sessionId}`, {
+    const response = await api.patch(`/live-sessions/status/${sessionId}`, {
       status,
     });
     console.log(

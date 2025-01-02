@@ -15,7 +15,7 @@ router.get("/", jwtToken, getAllLiveSessions);                    // Get all liv
 router.get("/:id", jwtToken, getLiveSessionById);                 // Get specific live session
 router.post("/", jwtToken, checkTeacher, createLiveSession);      // Create new live session
 router.put("/:id", jwtToken, checkTeacher, updateLiveSession);    // Update live session
-router.put("/status/:id", jwtToken, checkTeacher, updateSessionStatus); // Update session status
+router.patch("/status/:id", jwtToken, checkTeacher, updateSessionStatus); // Update session status
 router.delete("/:id", jwtToken, checkTeacher, deleteLiveSession); // Delete live session
 
 module.exports = router;
