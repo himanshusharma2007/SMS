@@ -4,18 +4,22 @@ import {
   Select,
   MenuItem,
   Typography,
-  TextField
-  ,Button
+  TextField,
+  Button,
+  Paper,
+  Box,
+  Divider,
+  Container,
 } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
 import { getAllClasses, getClassById } from "../services/classService";
 import TimeTableService from "../services/timeTableServices";
 import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
+import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 
 const EditClassTimeTable = () => {
   const { id } = useParams();
@@ -43,7 +47,7 @@ const EditClassTimeTable = () => {
   // Convert 12-hour time to 24-hour time
   const convertTo24HourFormat = (time12h) => {
     if (!time12h) return "";
-    return dayjs(time12h, 'hh:mm A').format('HH:mm');
+    return dayjs(time12h, "hh:mm A").format("HH:mm");
   };
 
   // Fetch existing timetable data and classes on component mount
@@ -153,7 +157,7 @@ const EditClassTimeTable = () => {
   };
 
   const handleUpdateTimeTable = async () => {
-    console.log('editTimeTable', editTimeTable)
+    console.log("editTimeTable", editTimeTable);
     // Validation checks
     if (!editTimeTable.classId) {
       showToast("Please select a class", "error");
@@ -199,139 +203,238 @@ const EditClassTimeTable = () => {
   };
 
   return (
-    <Grid container spacing={2} sx={{ mt: 1 }}>
-      <Grid item xs={12}>
-        <Typography variant="subtitle1">Select Class</Typography>
-        <Select
-          fullWidth
-          value={editTimeTable.classId || ""} // Ensure a valid value
-          onChange={(e) => handleClassSelection(e.target.value)}
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ mb: 4, fontWeight: "medium", color: "primary.main" }}
         >
-          {classes.map((cls) => (
-            <MenuItem key={cls._id} value={cls._id}>
-              {cls.name} - {cls.section}
-            </MenuItem>
-          ))}
-        </Select>
-      </Grid>
+          Edit Class Timetable
+        </Typography>
 
-      <Grid item xs={12}>
-        <Typography variant="subtitle1">Select Day</Typography>
-        <Select
-          fullWidth
-          value={editTimeTable.day || ""} // Ensure a valid value
-          onChange={(e) =>
-            setEditTimeTable((prev) => ({
-              ...prev,
-              day: e.target.value,
-            }))
-          }
-        >
-          {[
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-          ].map((day) => (
-            <MenuItem key={day} value={day}>
-              {day}
-            </MenuItem>
-          ))}
-        </Select>
-      </Grid>
+        <Grid container spacing={3}>
+          {/* Class and Day Selection Section */}
+          <Grid item xs={12} md={6}>
+            <Box sx={{ mb: 2 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ mb: 1, fontWeight: "medium" }}
+              >
+                Class
+              </Typography>
+              <Select
+                fullWidth
+                value={editTimeTable.classId || ""}
+                onChange={(e) => handleClassSelection(e.target.value)}
+                sx={{
+                  backgroundColor: "background.paper",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "rgba(0, 0, 0, 0.12)",
+                  },
+                }}
+              >
+                {classes.map((cls) => (
+                  <MenuItem key={cls._id} value={cls._id}>
+                    {cls.name} - {cls.section}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Box>
+          </Grid>
 
-      {editTimeTable.periods.map((period, index) => (
-        <Grid item xs={12} key={index}>
-          <Typography variant="h6">Period {index + 1}</Typography>
-          <Typography variant="subtitle1">Select Subject</Typography>
-          <Select
-            fullWidth
-            value={period.subjectId || ""} // Ensure a valid value
-            onChange={(e) => {
-              const selectedSubject = classSubjects.find(
-                (subject) => subject._id === e.target.value
-              );
-              handleSubjectSelection(index, selectedSubject);
-            }}
-            displayEmpty
-          >
-            {classSubjects.map((subject) => (
-              <MenuItem key={subject._id} value={subject._id}>
-                {subject.subjectName}
-              </MenuItem>
+          <Grid item xs={12} md={6}>
+            <Box sx={{ mb: 2 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ mb: 1, fontWeight: "medium" }}
+              >
+                Day
+              </Typography>
+              <Select
+                fullWidth
+                value={editTimeTable.day || ""}
+                onChange={(e) =>
+                  setEditTimeTable((prev) => ({
+                    ...prev,
+                    day: e.target.value,
+                  }))
+                }
+                sx={{
+                  backgroundColor: "background.paper",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "rgba(0, 0, 0, 0.12)",
+                  },
+                }}
+              >
+                {[
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                  "Saturday",
+                ].map((day) => (
+                  <MenuItem key={day} value={day}>
+                    {day}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Box>
+          </Grid>
+
+          {/* Periods Section */}
+          <Grid item xs={12}>
+            <Divider sx={{ my: 3 }} />
+            <Typography variant="h5" sx={{ mb: 3, fontWeight: "medium" }}>
+              Periods
+            </Typography>
+
+            {editTimeTable.periods.map((period, index) => (
+              <Paper
+                key={index}
+                elevation={1}
+                sx={{
+                  p: 3,
+                  mb: 3,
+                  borderRadius: 2,
+                  backgroundColor: "grey.50",
+                }}
+              >
+                <Typography variant="h6" sx={{ mb: 2, color: "primary.main" }}>
+                  Period {index + 1}
+                </Typography>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                      Subject
+                    </Typography>
+                    <Select
+                      fullWidth
+                      value={period.subjectId || ""}
+                      onChange={(e) => {
+                        const selectedSubject = classSubjects.find(
+                          (subject) => subject._id === e.target.value
+                        );
+                        handleSubjectSelection(index, selectedSubject);
+                      }}
+                      sx={{ backgroundColor: "background.paper" }}
+                    >
+                      {classSubjects.map((subject) => (
+                        <MenuItem key={subject._id} value={subject._id}>
+                          {subject.subjectName}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                      Teacher
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      value={period.teacher}
+                      disabled
+                      sx={{ backgroundColor: "background.paper" }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <TimePicker
+                        label="Start Time"
+                        value={
+                          period.startTime
+                            ? dayjs(`2024-01-01 ${period.startTime}`)
+                            : null
+                        }
+                        onChange={(newValue) => {
+                          const formattedTime = newValue
+                            ? newValue.format("hh:mm A")
+                            : "";
+                          const newPeriods = [...editTimeTable.periods];
+                          newPeriods[index] = {
+                            ...newPeriods[index],
+                            startTime: formattedTime,
+                          };
+                          setEditTimeTable((prev) => ({
+                            ...prev,
+                            periods: newPeriods,
+                          }));
+                        }}
+                        sx={{ width: "100%" }}
+                      />
+                    </LocalizationProvider>
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <TimePicker
+                        label="End Time"
+                        value={
+                          period.endTime
+                            ? dayjs(`2024-01-01 ${period.endTime}`)
+                            : null
+                        }
+                        onChange={(newValue) => {
+                          const formattedTime = newValue
+                            ? newValue.format("hh:mm A")
+                            : "";
+                          const newPeriods = [...editTimeTable.periods];
+                          newPeriods[index] = {
+                            ...newPeriods[index],
+                            endTime: formattedTime,
+                          };
+                          setEditTimeTable((prev) => ({
+                            ...prev,
+                            periods: newPeriods,
+                          }));
+                        }}
+                        sx={{ width: "100%" }}
+                      />
+                    </LocalizationProvider>
+                  </Grid>
+                </Grid>
+              </Paper>
             ))}
-          </Select>
-          <TextField
-            fullWidth
-            label="Teacher"
-            value={period.teacher}
-            disabled
-            sx={{ mt: 1 }}
-          />
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <TimePicker
-              label="Start Time"
-              value={period.startTime ? dayjs(`2024-01-01 ${period.startTime}`) : null}
-              onChange={(newValue) => {
-                const formattedTime = newValue ? newValue.format('hh:mm A') : '';
-                const newPeriods = [...editTimeTable.periods];
-                newPeriods[index] = {
-                  ...newPeriods[index],
-                  startTime: formattedTime
-                };
-                setEditTimeTable((prev) => ({
-                  ...prev,
-                  periods: newPeriods,
-                }));
-              }}
-              sx={{ mt: 1, width: '100%' }}
-            />
-            <TimePicker
-              label="End Time"
-              value={period.endTime ? dayjs(`2024-01-01 ${period.endTime}`) : null}
-              onChange={(newValue) => {
-                const formattedTime = newValue ? newValue.format('hh:mm A') : '';
-                const newPeriods = [...editTimeTable.periods];
-                newPeriods[index] = {
-                  ...newPeriods[index],
-                  endTime: formattedTime
-                };
-                setEditTimeTable((prev) => ({
-                  ...prev,
-                  periods: newPeriods,
-                }));
-              }}
-              sx={{ mt: 1, width: '100%' }}
-            />
-          </LocalizationProvider>
+          </Grid>
+
+          {/* Action Buttons */}
+          <Grid item xs={12}>
+            <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+              <Button
+                variant="outlined"
+                color="secondary"
+                startIcon={<AddIcon />}
+                onClick={addPeriod}
+                disabled={!editTimeTable.classId}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  px: 3,
+                }}
+              >
+                Add Period
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleUpdateTimeTable}
+                disabled={!editTimeTable.classId}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  px: 4,
+                }}
+              >
+                Update Timetable
+              </Button>
+            </Box>
+          </Grid>
         </Grid>
-      ))}
-
-      <Grid item xs={12}>
-        <Button
-          variant="outlined"
-          color="secondary"
-          startIcon={<AddIcon />}
-          onClick={addPeriod}
-          disabled={!editTimeTable.classId}
-        >
-          Add Period
-        </Button>
-      </Grid>
-
-      <Grid item xs={12}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleUpdateTimeTable}
-          disabled={!editTimeTable.classId}
-        >
-          Update Timetable
-        </Button>
-      </Grid>
-    </Grid>
+      </Paper>
+    </Container>
   );
 };
 
