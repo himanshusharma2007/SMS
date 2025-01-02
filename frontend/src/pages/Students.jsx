@@ -19,7 +19,6 @@ const Student = () => {
   const entriesPerPage = 10;
 
   // Modals
-  const [editingStudent, setEditingStudent] = useState(null);
   const [studentToDelete, setStudentToDelete] = useState(null);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   // Fetch initial data
