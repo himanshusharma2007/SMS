@@ -8,7 +8,8 @@ const sendEmail = require("../utils/sendMail");
 // Get all students
 exports.getAllStudents = async (req, res) => {
   try {
-    const students = await Student.find({isActive: true});
+
+    const students = await Student.find({});
     return res.status(200).json({ message: "get all student", data: students });
   } catch (error) {
     return res.status(500).json({ error: error.message });
