@@ -132,6 +132,10 @@ const studentSchema = new mongoose.Schema(
       ref: "Receipt",
       default: null,
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true, validateBeforeSave: true }
 );

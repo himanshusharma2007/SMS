@@ -576,8 +576,7 @@ exports.updateParentAndStudent = async (req, res) => {
   try {
     // Update Student details
     const existStudent = await Student.findById(id);
-    if (!existStudent)
-      return res.status(404).json({ error: "Student not found" });
+    if (!existStudent || !existStudent.isActive) return res.status(404).json({ error: "Student not found" });
     const updatedStudent = await Student.findByIdAndUpdate(
       id,
       {

@@ -90,6 +90,11 @@ exports.updateAttendance = async (req, res) => {
 
     const { staffId, date, status } = req.body;
 
+    const staff = await Staff.findById(staffId);
+    if(!staff || !staff.isActive){
+      return res.status(404).json({error: "Staff not found"})
+    }
+
     console.log("updateAttendance: Query date set to:", date);
 
     console.log("updateAttendance: Checking existing attendance record...");

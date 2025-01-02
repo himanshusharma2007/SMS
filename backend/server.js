@@ -33,7 +33,7 @@ const URL = process.env.DB_URL;
 console.log("process.env.DB_URL", process.env.DB_URL);
 const PORT = process.env.PORT || 3000;
 
-app.use(express.static(path.join(__dirname, "../frontend/dist")));
+// app.use(express.static(path.join(__dirname, "../frontend/dist")));
 // Middleware
 app.use(express.json());
 app.use(cookieParser());

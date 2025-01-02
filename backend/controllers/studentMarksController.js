@@ -22,7 +22,7 @@ exports.getAllStudentMarks = async (req, res) => {
   try {
     const marks = await StudentMarks.find().populate({
       path: "studentId", // This is the field in the StudentMarks model
-      select: "name registrationNumber dob class", // Fields from the student document
+      select: "name registrationNumber dob class isActive", // Fields from the student document
       populate: {
         path: "class", // Populating the class field, assuming `class` is a reference to another collection
         select: "name section", // You can adjust the fields as needed from the class collection
@@ -71,7 +71,7 @@ exports.updateStudentMarks = async (req, res) => {
   try {
     console.log("req.params", req.params);
     console.log("req.body", req.body);
-    const studentData=await StudentMarks.findOne({_id: req.params.studentId}).populate("studentId")
+    const studentData=await StudentMarks.findOne({_id: req.params.studentId}).populate("studentId isActive")
     console.log('studentData', studentData);
     const updatedMarks = await StudentMarks.findOneAndUpdate(
       { _id: req.params.studentId },

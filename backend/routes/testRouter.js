@@ -9,18 +9,20 @@ const {
   addQuestionsToTest
 } = require("../controllers/testController");
 const protect = require("../middlewares/jwtToken");
+const jwtToken = require("../middlewares/jwtToken");
+const checkTeacher = require("../middlewares/checkTeacher");
 
 // Protect all routes - require authentication
 router.use(protect);
 
 // Create new test - only teachers and admins can create tests
-router.post("/", createTest);
+router.post("/",jwtToken, checkTeacher, createTest);
 
 // Get all tests - accessible to authenticated users
-router.get("/", getAllTests);
+router.get("/",jwtToken, checkTeacher, getAllTests);
 
 // Get specific test by ID
-router.get("/:id", getTestById);
+router.get("/:id",jwtToken, getTestById);
 
 // Update test - only teachers who created the test and admins can update
 // router.put("/:id", updateTestById);
@@ -29,6 +31,6 @@ router.get("/:id", getTestById);
 // router.delete("/:id", deleteTestById);
 
 // Add Test Questions
-router.post("/:id/questions", addQuestionsToTest);
+router.post("/:id/questions",jwtToken, checkTeacher, addQuestionsToTest);
 
 module.exports = router;

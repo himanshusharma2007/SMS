@@ -17,8 +17,8 @@ const checkAdmin = require("../middlewares/checkAdmin");
 router.post("/",jwtToken,checkTeacher, addStudentAttendance);
 
 // Get attendance records for a specific student
-router.get("/monthly/:year/:month",jwtToken, checkAdmin, getMonthlyAttendance);
-router.get("/monthly-class/:year/:month/:class",jwtToken, checkAdmin, getMonthlyAttendanceByClass);
+router.get("/monthly/:year/:month",jwtToken, checkTeacher, getMonthlyAttendance);
+router.get("/monthly-class/:year/:month/:class",jwtToken, checkTeacher, getMonthlyAttendanceByClass);
 router.get("/:studentId",jwtToken, getStudentAttendance);
 
 // Get all student attendance records

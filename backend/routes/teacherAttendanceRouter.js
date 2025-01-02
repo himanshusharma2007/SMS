@@ -10,6 +10,7 @@ const {
 
 const jwtToken = require("../middlewares/jwtToken");
 const checkAdmin = require("../middlewares/checkAdmin");
+const checkTeacher = require("../middlewares/checkTeacher");
 router.post("/",jwtToken, checkAdmin, addTeacherAttendance);
 router.get("/:teacherId",jwtToken, getTeacherAttendance);
 router.get("/",jwtToken, checkAdmin, getAllTeacherAttendance);

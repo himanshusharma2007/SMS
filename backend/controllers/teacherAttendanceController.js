@@ -1,4 +1,5 @@
 const TeacherAttendance = require("../models/teacherAttendanceModel");
+const Teachers = require("../models/teacherModels");
 
 // Add a new teacher attendance record
 exports.addTeacherAttendance = async (req, res) => {
@@ -13,6 +14,11 @@ exports.addTeacherAttendance = async (req, res) => {
             entryTime: req.body.entryTime || '',
             
         };
+
+        const teacherOrNot = await Teachers.findById(attendanceData.teacher).populate("staffId")
+        if(!teacherOrNot || !teacherOrNot.staffId.isActive){
+            return res.status(404).json({error: "teacher not found"})
+        }
         
         console.log('Processed attendance data:', attendanceData);
         
