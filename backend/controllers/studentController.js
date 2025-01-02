@@ -8,7 +8,7 @@ const sendEmail = require("../utils/sendMail");
 // Get all students
 exports.getAllStudents = async (req, res) => {
   try {
-    const students = await Student.find();
+    const students = await Student.find({isActive: true});
     return res.status(200).json({ message: "get all student", data: students });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -21,7 +21,7 @@ exports.getStudentById = async (req, res) => {
     const { id } = req.params;
     console.log("Id in controller:", id);
     const student = await Student.findById(id).populate("class");
-    if (!student) {
+    if (!student || !student.isActive) {
       return res.status(404).json({ error: "Student not found" });
     }
     return res
@@ -31,12 +31,13 @@ exports.getStudentById = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
 exports.getStudentByClass = async (req, res) => {
   try {
     const { id } = req.params;
     console.log("id ", id);
     const classData = await Class.findById(id);
-    const student = await Student.find({ class: classData._id });
+    const student = await Student.find({ class: classData._id, isActive: true});
     if (!student) {
       return res.status(404).json({ error: "Student not found" });
     }
@@ -54,7 +55,7 @@ exports.updateStudentById = async (req, res) => {
   try {
     console.log("Student update Data:", req.body);
     const { id } = req.params;
-    const updatedStudent = await Student.findByIdAndUpdate(id, req.body, {
+    const updatedStudent = await Student.findOneAndUpdate({_id: id, isActive: true}, req.body, {
       new: true,
       runValidators: true,
     });
@@ -103,7 +104,7 @@ exports.addFeePayment = async (req, res) => {
 
     // Find student's fee record
     const student = await Student.findById(studentId);
-    if (!student) {
+    if (!student || !student.isActive) {
       return res.status(404).json({ error: "Student record not found." });
     }
 
@@ -222,7 +223,7 @@ exports.getAllReceiptByStudent = async (req, res) => {
 exports.feeReminderByEmail = async (req, res) => {
   try {
     const student = await Student.findById(req.params.id);
-    if (!student) return res.status(404).json({ error: "Student not found" });
+    if (!student || !student.isActive) return res.status(404).json({ error: "Student not found" });
     console.log(student);
     const parent = await Parents.findOne({ student: student._id });
     if (!parent) return res.status(404).json({ error: "Parent not found" });

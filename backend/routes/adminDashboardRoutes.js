@@ -1,13 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const dashboardController = require("../controllers/adminDashboardController");
-const checkadmin = require("../middlewares/checkAdmin"); // Assuming you have auth middleware
+const dashboardController = require("../controllers/adminDashboardController");; // Assuming you have auth middleware
 const jwtToken = require("../middlewares/jwtToken");
+const checkAdmin = require("../middlewares/checkAdmin");
 router.use(jwtToken);
-router.use(checkadmin);
 // Routes for dashboard statistics
-router.get("/stats", dashboardController.getDashboardStats);
+router.get("/stats", checkAdmin, dashboardController.getDashboardStats);
 
-router.post("/stats/update", dashboardController.updateDashboardStats);
+router.post("/stats/update", checkAdmin, dashboardController.updateDashboardStats);
 
 module.exports = router;

@@ -90,6 +90,7 @@ const AddClassTimeTable = ({ onTimeTableAdded }) => {
 
   const fetchFreeTeachers = async (periodIndex, day, periodNumber) => {
     try {
+      console.log("newTimeTable", newTimeTable);
       console.log(
         `Fetching free teachers for Day: ${day}, Period: ${periodNumber}`
       );
@@ -101,10 +102,8 @@ const AddClassTimeTable = ({ onTimeTableAdded }) => {
       console.log("Free Teachers Response:", response);
 
       // Filter free teachers based on the selected subject's teacher type/department
-      const currentSubject = classSubjects.find(
-        (subject) => subject._id === newTimeTable.periods[periodIndex].subjectId
-      );
-
+      const currentSubject = newTimeTable.periods[periodIndex];
+      console.log("currentSubject", currentSubject);
       const filteredFreeTeachers = response.freeTeachers.filter(
         (teacher) => teacher.department === currentSubject?.teacher.department
       );

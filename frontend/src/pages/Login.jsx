@@ -30,6 +30,7 @@ function LoginPage() {
       if (loginResponse.message === "Login successfully!") {
         try {
           const profileResponse = await ProfileService.getProfile();
+          console.log(profileResponse)
           dispatch(setUser(profileResponse.user));
           showToast("Login successful", "success");
           navigate("/dashboard");

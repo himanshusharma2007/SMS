@@ -9,6 +9,7 @@ const hashPassword = require("../utils/password");
 exports.getProfile = async (req, res) => {
     try {
         const user = req.user
+        console.log("get profile",user)
         return res.status(200).json({ message: "Get profile", user })
     } catch (error) {
         console.log(err);

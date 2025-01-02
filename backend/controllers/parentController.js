@@ -3,7 +3,7 @@ const Parent = require("../models/parentModels");
 // Get all parents
 const getAllParents = async (req, res) => {
     try {
-        const parents = await Parent.find().populate("student", "name rollNumber class");
+        const parents = await Parent.find().populate("student", "name rollNumber class isActive");
         return res.status(200).json({
             message: "get all parents",
             data: parents
@@ -19,7 +19,7 @@ const getAllParents = async (req, res) => {
 const getParentById = async (req, res) => {
     const { id } = req.params;
     try {
-        const parent = await Parent.findById(id).populate("student", "name rollNumber class");
+        const parent = await Parent.findById(id).populate("student", "name rollNumber class isActive");
         if (!parent) {
             return res.status(404).json({
                 message: "Parent not found"
@@ -39,7 +39,7 @@ const getParentById = async (req, res) => {
 const getParentByStudentId = async (req, res) => {
     const { id } = req.params;
     try {
-        const parent = await Parent.findOne({student: id});
+        const parent = await Parent.findOne({student: id}).populate("student", "name rollNumber class isActive");
         if (!parent) {
             return res.status(404).json({
                 message: "Parent not found"
