@@ -10,20 +10,6 @@ import {
 import SubmissionService from "../services/submissionservice";
 import { useToast } from "../context/ToastContext";
 
-/*************  ✨ Codeium Command ⭐  *************/
-/**
- * CustomButton component for rendering a stylized button with various states.
- *
- * @param {ReactNode} children - The content to be displayed inside the button.
- * @param {function} onClick - Event handler for the button click.
- * @param {boolean} [disabled=false] - Flag to disable the button.
- * @param {string} [variant="primary"] - The style variant of the button, can be "primary", "secondary", or "success".
- * @param {string} [className=""] - Additional classes to customize the button styling.
- *
- * @returns {JSX.Element} A customizable button component.
- */
-
-/******  8fe1f29f-96d6-4f41-af92-0ec2f44192c9  *******/
 const CustomButton = ({
   children,
   onClick,
