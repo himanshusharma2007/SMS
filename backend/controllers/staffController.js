@@ -1,89 +1,141 @@
 const Staff = require("../models/staffModels");
 const Department = require("../models/departmentModels");
-
+const Admin = require("../models/adminModels");
+const { registrationEmail } = require("../utils/html/html");
+const generateUniqueId = require("../utils/generateId");
+const hashPassword = require("../utils/password");
+const sendEmail = require("../utils/sendMail");
+const Connections = require("../models/connectionModels");
 // Add a new staff member
 exports.addStaff = async (req, res) => {
-  console.log("Starting addStaff function");
-
+  console.log("Received request to add staff:", req.body);
+  const departmentId=req.body.department;
+  const department = await Department.findById(departmentId);
+  if(!department){
+    console.log("Error: Department not found");
+    return res.status(400).json({ error: "Department not found" });
+  }
+  const departmentName=department.name
   try {
-    console.log("Request body received:", req.body);
-
     const {
       name,
-      email,
-      joinDate,
       phoneNo,
-      department,
+      joinDate,
+      email,
+      role="admin",
       position,
       salary,
-      address,
       govId,
+      address,
     } = req.body;
 
-    // Log extracted fields
-    console.log("Extracted fields:", {
-      name,
-      email,
-      joinDate,
-      phoneNo,
-      department,
-      position,
-      salary,
-      address,
-      govId,
-    });
-
-    // Ensure department exists
-    console.log("Checking if department exists...", department);
-    const dept = await Department.findById(department);
-    if (!dept) {
-      console.error("Department not found");
-      return res.status(404).json({ error: "Department not found" });
+    // Validation
+    console.log("Validating staff data...");
+    if (
+      !name ||
+      !phoneNo ||
+      !joinDate ||
+      !email ||
+      !position ||
+      !salary ||
+      !govId ||
+      !address ||
+      !departmentName
+    ) {
+      console.log("Validation failed: All fields are required.");
+      return res.status(400).json({ error: "All fields are required." });
+    }
+    if (await Staff.findOne({ email })) {
+      console.log("Validation failed: Email already used by staff");
+      return res.status(400).json({ error: "Email already used by staff" });
+    }
+    if (await Staff.findOne({ govId })) {
+      console.log("Validation failed: govId already used by staff");
+      return res.status(400).json({ error: "govId already used by staff" });
     }
 
-    console.log("Department found:", dept);
-
-    if (dept.name === "Administration" || dept.name === "Teaching") {
-      console.error(
-        "Attempt to directly create staff for Administration or Teaching department"
-      );
-      return res.status(400).json({
-        error: "Administration and Teaching staff not create directly",
-      });
+    const department = await Department.findOne({ name: departmentName });
+    if (!department) {
+      console.log("Error: Department not found");
+      return res.status(400).json({ error: "Department not found" });
     }
 
-    // Create a new staff member
-    console.log("Creating a new staff member...");
+    const uId = `S${await generateUniqueId()}`;
+    console.log("Generated unique ID for staff:", uId);
+
+    const encryptPassword = await hashPassword(uId);
+    if (!encryptPassword) {
+      console.log("Error: hash password failed");
+      return res.status(500).json({ error: "hash password failed" });
+    }
+
     const staff = new Staff({
       name,
       email,
-      joinDate,
       phoneNo,
-      department,
+      joinDate,
+      department: department._id,
       position,
+      teacherOrAdmin:
+        departmentName === "Administration" ? "SuperAdmin" : "Staff",
       salary,
       address,
       govId,
     });
 
-    // Save staff
-    console.log("Saving staff to database...");
+    console.log("Saving staff data...");
+
+    if (departmentName === "Administration") {
+      console.log("Creating admin for Administration department...");
+
+      const newAdmin = new Admin({
+        name,
+        staffId: staff._id,
+        role: role || "admin",
+        password: encryptPassword,
+        registrationNumber: uId,
+      });
+
+      staff.teacherOrAdminId = newAdmin._id;
+      department.staffMembers.push(staff._id);
+
+      await newAdmin.save();
+      newAdmin.password = "****";
+      const sendRegistrationMail = await sendEmail(
+        staff.email,
+        "Email for Login Id and password",
+        registrationEmail(newAdmin.name, uId)
+      );
+
+      if (!sendRegistrationMail) {
+        console.log("Warning: Staff added successfully, but Email not sent");
+        return res.status(400).json({
+          error: "Staff added successfully, but Email not sent",
+        });
+      }
+      console.log("New admin saved successfully.");
+    } else {
+      department.staffMembers.push(staff._id);
+    }
+
+    await department.save();
+    console.log("Department updated with new staff member.");
+
     await staff.save();
-    console.log("Staff saved successfully:", staff);
+    console.log("Staff saved successfully.");
 
-    // Add to department
-    console.log("Adding staff to department...");
-    dept.staffMembers.push(staff._id);
-    await dept.save();
-    console.log("Staff added to department successfully");
+    console.log("Creating connection for new staff...");
+    await Connections.create({
+      name: staff.name,
+      email: staff.email,
+      profession: departmentName === "Administration" ? "admin" : "staff",
+      phoneNo: staff.phoneNo,
+    });
 
-    // Respond to client
-    console.log("Responding with success message...");
-    return res
-      .status(201)
-      .json({ message: "Staff added successfully", data: staff });
+    console.log("Staff added successfully:", staff);
+    return res.status(201).json({ message: "Staff added successfully", staff });
   } catch (error) {
-    console.error("Error occurred:", error.message);
+    console.error("Error in addStaff:", error);
     return res.status(400).json({ error: error.message });
   }
 };
@@ -136,7 +188,7 @@ exports.getStaff = async (req, res) => {
 
 exports.getAllStaff = async (req, res) => {
   try {
-    const staffs = await Department.find({isActive: true}).populate("staffMembers");
+    const staffs = await Department.find().populate("staffMembers");
     return res.status(200).json({ message: "get all staff", data: staffs });
   } catch (error) {
     return res.status(400).json({ error: error.message });

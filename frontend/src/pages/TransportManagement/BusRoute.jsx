@@ -17,6 +17,8 @@ const BusRoute = () => {
   const [stopPoints, setStopPoints] = useState([]);
   const [driverLocation, setDriverLocation] = useState({ lat: null, lng: null });
 
+  // ... (keeping all the handler functions same as they manage state) ...
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -73,38 +75,59 @@ const BusRoute = () => {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Bus Route Management</h1>
-      <button
-        className="bg-blue-600 text-white px-4 py-2 rounded-md"
-        onClick={handleAddRoute}
-      >
-        Add New Route
-      </button>
+    <div className="p-6 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold text-gray-800">Bus Route Management</h1>
+        <button
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2"
+          onClick={handleAddRoute}
+        >
+          <span>Add New Route</span>
+        </button>
+      </div>
 
       {/* Route Cards */}
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {routes.map((route, index) => (
           <div
             key={index}
-            className="border rounded-md p-4 shadow-md"
+            className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 p-6"
           >
-            <h3 className="text-lg font-bold">Route {index + 1}</h3>
-            <p>Bus Number: {route.busNumber}</p>
-            <p>Route Distance: {route.routeDistance}</p>
-            <p>Start: {route.startLocation}</p>
-            <p>End: {route.endLocation}</p>
-            <p>
-              Driver Location:{" "}
-              {route.driverLocation.lat && route.driverLocation.lng
-                ? `(${route.driverLocation.lat}, ${route.driverLocation.lng})`
-                : "Not updated"}
-            </p>
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Route {index + 1}</h3>
+              <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                Bus {route.busNumber}
+              </span>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Distance</span>
+                <span className="font-medium">{route.routeDistance} km</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Start</span>
+                <span className="font-medium">{route.startLocation}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">End</span>
+                <span className="font-medium">{route.endLocation}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Driver Location</span>
+                <span className="font-medium">
+                  {route.driverLocation.lat && route.driverLocation.lng
+                    ? `(${route.driverLocation.lat.toFixed(4)}, ${route.driverLocation.lng.toFixed(4)})`
+                    : "Not updated"}
+                </span>
+              </div>
+            </div>
+
             <button
-              className="mt-2 bg-green-600 text-white px-4 py-2 rounded-md"
+              className="mt-4 w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
               onClick={() => handleViewTracking(index)}
             >
-              Update Driver Location
+              Update Location
             </button>
           </div>
         ))}
@@ -112,53 +135,52 @@ const BusRoute = () => {
 
       {/* Add Route Modal */}
       {showAddRouteModal && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white rounded-lg p-6 w-96">
-            <h2 className="text-xl font-bold mb-4">Add New Route</h2>
-            <input
-              type="text"
-              name="busNumber"
-              value={formData.busNumber}
-              onChange={handleInputChange}
-              className="w-full mb-2 p-2 border rounded"
-              placeholder="bus number"
-            />
-            <input
-              type="text"
-              name="routeDistance"
-              value={formData.routeDistance}
-              onChange={handleInputChange}
-              className="w-full mb-2 p-2 border rounded"
-              placeholder="route Distance"
-
-            />
-            <input
-              type="text"
-              name="startLocation"
-              value={formData.startLocation}
-              onChange={handleInputChange}
-              className="w-full mb-2 p-2 border rounded"
-              placeholder="start Location"
-              
-            />
-            <input
-              type="text"
-              name="endLocation"
-              value={formData.endLocation}
-              onChange={handleInputChange}
-              className="w-full mb-4 p-2 border rounded"
-              placeholder="end Locationn"
-
-            />
-            <div className="flex justify-end space-x-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h2 className="text-xl font-bold mb-6">Add New Route</h2>
+            <div className="space-y-4">
+              <input
+                type="text"
+                name="busNumber"
+                value={formData.busNumber}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="Bus Number"
+              />
+              <input
+                type="text"
+                name="routeDistance"
+                value={formData.routeDistance}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="Route Distance (km)"
+              />
+              <input
+                type="text"
+                name="startLocation"
+                value={formData.startLocation}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="Start Location"
+              />
+              <input
+                type="text"
+                name="endLocation"
+                value={formData.endLocation}
+                onChange={handleInputChange}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="End Location"
+              />
+            </div>
+            <div className="flex justify-end space-x-4 mt-6">
               <button
-                className="bg-gray-500 text-white px-4 py-2 rounded"
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
                 onClick={() => setShowAddRouteModal(false)}
               >
                 Cancel
               </button>
               <button
-                className="bg-blue-600 text-white px-4 py-2 rounded"
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
                 onClick={handleNextToMap}
               >
                 Next
@@ -170,30 +192,33 @@ const BusRoute = () => {
 
       {/* Map Modal */}
       {showMapModal && (
-        <div className="fixed  inset-0 bg-gray-800 bg-opacity-50 z-50 flex justify-center items-center">
-          <div className="bg-white-800 rounded-lg w-full h-full p-6 relative">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+          <div className="bg-white rounded-lg w-full max-w-4xl m-4 p-6">
             <h2 className="text-xl font-bold mb-4">Select Bus Stops</h2>
-            <MapContainer
-              center={[26.9124, 75.7873]} // Jaipur's approximate coordinates
-              zoom={12}
-              style={{ height: "600px", width: "600px" }}
-            >
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <MapClickHandler onClick={handleMapClick} />
-              {stopPoints.map((point, index) => (
-                <Marker key={index} position={[point.lat, point.lng]} />
-              ))}
-              <Polyline positions={stopPoints.map((point) => [point.lat, point.lng])} color="blue" />
-            </MapContainer>
-            <div className="fixed bottom-4 left-4 flex space-x-4">
+            <div className="relative h-[600px] w-full rounded-lg overflow-hidden">
+              <MapContainer
+                center={[26.9124, 75.7873]}
+                zoom={12}
+                style={{ height: "100%", width: "100%" }}
+                className="rounded-lg"
+              >
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <MapClickHandler onClick={handleMapClick} />
+                {stopPoints.map((point, index) => (
+                  <Marker key={index} position={[point.lat, point.lng]} />
+                ))}
+                <Polyline positions={stopPoints.map((point) => [point.lat, point.lng])} color="blue" />
+              </MapContainer>
+            </div>
+            <div className="flex justify-end space-x-4 mt-6">
               <button
-                className="bg-gray-500 text-white px-4 py-2 rounded"
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
                 onClick={() => setShowMapModal(false)}
               >
                 Cancel
               </button>
               <button
-                className="bg-green-600 text-white px-4 py-2 rounded"
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
                 onClick={handleConfirmRoute}
               >
                 Confirm Route
@@ -205,34 +230,36 @@ const BusRoute = () => {
 
       {/* Bus Tracking Modal */}
       {showTrackingModal && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white rounded-lg w-96 p-6">
-            <h2 className="text-xl font-bold mb-4">Update Driver Location</h2>
-            <input
-              type="number"
-              name="lat"
-              value={driverLocation.lat || ""}
-              onChange={handleDriverLocationUpdate}
-              className="w-full mb-2 p-2 border rounded"
-              placeholder="Latitude"
-            />
-            <input
-              type="number"
-              name="lng"
-              value={driverLocation.lng || ""}
-              onChange={handleDriverLocationUpdate}
-              className="w-full mb-4 p-2 border rounded"
-              placeholder="Longitude"
-            />
-            <div className="flex justify-end space-x-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-md mx-4 p-6">
+            <h2 className="text-xl font-bold mb-6">Update Driver Location</h2>
+            <div className="space-y-4">
+              <input
+                type="number"
+                name="lat"
+                value={driverLocation.lat || ""}
+                onChange={handleDriverLocationUpdate}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="Latitude"
+              />
+              <input
+                type="number"
+                name="lng"
+                value={driverLocation.lng || ""}
+                onChange={handleDriverLocationUpdate}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="Longitude"
+              />
+            </div>
+            <div className="flex justify-end space-x-4 mt-6">
               <button
-                className="bg-gray-500 text-white px-4 py-2 rounded"
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
                 onClick={() => setShowTrackingModal(false)}
               >
                 Cancel
               </button>
               <button
-                className="bg-blue-600 text-white px-4 py-2 rounded"
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
                 onClick={confirmDriverLocation}
               >
                 Confirm
