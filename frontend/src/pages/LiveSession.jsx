@@ -14,6 +14,7 @@ import teacherService from "../services/teacherService";
 import getStudentByClass from "../services/studentServices";
 import { useToast } from "../context/ToastContext";
 import AddLiveSessionModal from "../modals/AddLiveSessionModal";
+import Loader from "../components/Loader/Loader";
 const LiveSessionManagement = () => {
   const [sessions, setSessions] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
@@ -145,28 +146,6 @@ const LiveSessionManagement = () => {
     }
   };
 
-  // const handleEdit = async (session) => {
-  //   try {
-  //     const sessionData = await getLiveSessionById(session._id);
-  //     setSelectedSession(sessionData);
-  //     setFormData({
-  //       title: sessionData.title,
-  //       description: sessionData.description,
-  //       sessionLink: sessionData.sessionLink,
-  //       teacher: sessionData.teacher,
-  //       class: sessionData.class,
-  //       students: sessionData.students,
-  //       startFrom: new Date(sessionData.startFrom).toISOString().slice(0, 16),
-  //       duration: sessionData.duration,
-  //       status: sessionData.status,
-  //     });
-  //     await fetchClassStudents(sessionData.class);
-  //     setShowModal(true);
-  //   } catch (err) {
-  //     setError(err.message);
-  //   }
-  // };
-
   const handleDelete = async () => {
     if (selectedSession) {
       try {
@@ -223,11 +202,7 @@ const LiveSessionManagement = () => {
     );
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent" />
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
@@ -333,7 +308,6 @@ const LiveSessionManagement = () => {
         {filteredSessions.map((session) => (
           <div key={session._id} className="p-6 border-b last:border-b-0">
             <div className="flex items-center justify-between">
-
               <div className="flex items-center gap-4">
                 <div className="bg-blue-100 p-3 rounded-full">
                   <MdVideoCall className="text-blue-600 text-xl" />
@@ -362,7 +336,9 @@ const LiveSessionManagement = () => {
               <div className="flex items-center gap-4">
                 <select
                   value={session.status}
-                  onChange={(e) => handleStatusChange(session._id, e.target.value)}
+                  onChange={(e) =>
+                    handleStatusChange(session._id, e.target.value)
+                  }
                   className={`px-3 py-1 rounded-lg text-sm border ${getStatusColor(
                     session.status
                   )}`}

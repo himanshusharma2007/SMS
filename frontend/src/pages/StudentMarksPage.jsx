@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { studentMarksService } from "../services/studentMarksServices";
 import ResultModal from "../modals/ResultModal";
 import { useToast } from "../context/ToastContext";
-
+import Loader from "../components/Loader/Loader";
 const StudentMarksPage = () => {
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
@@ -23,7 +23,7 @@ const StudentMarksPage = () => {
     return Array.from(classes).sort((a, b) => parseInt(a) - parseInt(b));
   };
   const calculatePercentage = (student) => {
-    console.log('student in calculatePercentage', student)
+    console.log("student in calculatePercentage", student);
     const totalMarks = student.marks.reduce((acc, mark) => acc + mark.mark, 0);
     const maxMarks = student.marks.length * 100; // Assuming max marks is 100 for each subject
     return ((totalMarks / maxMarks) * 100).toFixed(2);
@@ -32,7 +32,7 @@ const StudentMarksPage = () => {
     const fetchData = async () => {
       try {
         const response = await studentMarksService.getAllStudentMarks();
-        console.log('response in StudentMarksPage', response )
+        console.log("response in StudentMarksPage", response);
         setStudents(response);
         setFilteredStudents(response);
         showToast("Student marks loaded successfully", "success");
@@ -58,7 +58,7 @@ const StudentMarksPage = () => {
     }
   };
 
-  if (loading) return <div className="p-6">Loading...</div>;
+  if (loading) return <Loader />;
   if (error) return <div className="p-6 text-red-600">Error: {error}</div>;
 
   return (

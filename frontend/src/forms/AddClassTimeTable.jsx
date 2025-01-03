@@ -3,13 +3,17 @@ import {
   Grid,
   Select,
   MenuItem,
-  TextField,
   Button,
   Typography,
   Snackbar,
   Alert,
+  Paper,
+  Box,
+  Divider,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
-import { Add as AddIcon } from "@mui/icons-material";
+import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { getAllClasses, getClassById } from "../services/classService";
 import TimeTableService from "../services/timeTableServices";
 import { useNavigate } from "react-router-dom";
@@ -90,6 +94,7 @@ const AddClassTimeTable = ({ onTimeTableAdded }) => {
 
   const fetchFreeTeachers = async (periodIndex, day, periodNumber) => {
     try {
+      console.log("newTimeTable", newTimeTable);
       console.log(
         `Fetching free teachers for Day: ${day}, Period: ${periodNumber}`
       );
@@ -101,10 +106,8 @@ const AddClassTimeTable = ({ onTimeTableAdded }) => {
       console.log("Free Teachers Response:", response);
 
       // Filter free teachers based on the selected subject's teacher type/department
-      const currentSubject = classSubjects.find(
-        (subject) => subject._id === newTimeTable.periods[periodIndex].subjectId
-      );
-
+      const currentSubject = newTimeTable.periods[periodIndex];
+      console.log("currentSubject", currentSubject);
       const filteredFreeTeachers = response.freeTeachers.filter(
         (teacher) => teacher.department === currentSubject?.teacher.department
       );
@@ -247,148 +250,234 @@ const AddClassTimeTable = ({ onTimeTableAdded }) => {
   };
 
   return (
-    <Grid container spacing={2} sx={{ mt: 1 }}>
-      <Grid item xs={12}>
-        <Typography variant="subtitle1">Select Class</Typography>
-        <Select
-          fullWidth
-          value={newTimeTable.classId}
-          onChange={(e) => handleClassSelection(e.target.value)}
-        >
-          {classes.map((cls) => (
-            <MenuItem key={cls._id} value={cls._id}>
-              {cls.name} - {cls.section}
-            </MenuItem>
-          ))}
-        </Select>
-      </Grid>
+    <Box sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
+        <Typography variant="h5" gutterBottom sx={{ mb: 4, fontWeight: 600 }}>
+          Create Class Timetable
+        </Typography>
 
-      <Grid item xs={12}>
-        <Typography variant="subtitle1">Select Day</Typography>
-        <Select
-          fullWidth
-          value={newTimeTable.day}
-          onChange={(e) => handleDaySelection(e.target.value)}
-        >
-          {[
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-          ].map((day) => (
-            <MenuItem key={day} value={day}>
-              {day}
-            </MenuItem>
-          ))}
-        </Select>
-      </Grid>
-
-      {newTimeTable.periods.map((period, index) => (
-        <Grid item xs={12} key={index}>
-          <Typography variant="h6">Period {index + 1}</Typography>
-          <Typography variant="subtitle1">Select Subject</Typography>
-          <Select
-            fullWidth
-            value={period.subjectId}
-            onChange={(e) => {
-              const selectedSubject = classSubjects.find(
-                (subject) => subject._id === e.target.value
-              );
-              handleSubjectSelection(index, selectedSubject);
-            }}
-            displayEmpty
-            disabled={!newTimeTable.day}
-          >
-            {classSubjects.map((subject) => (
-              <MenuItem key={subject._id} value={subject._id}>
-                {subject.subjectName}
-              </MenuItem>
-            ))}
-          </Select>
-
-          {period.subjectId && (
-            <>
-              <Typography variant="subtitle1" sx={{ mt: 1 }}>
-                Select Teacher
-              </Typography>
-              <Select
-                fullWidth
-                value={period.teacher}
-                onChange={(e) => handleTeacherSelection(index, e.target.value)}
-                displayEmpty
-              >
-                {freeTeachers.map((teacher) => (
-                  <MenuItem key={teacher._id} value={teacher._id}>
-                    {teacher.name} ({teacher.subject})
-                  </MenuItem>
-                ))}
-              </Select>
-            </>
-          )}
-
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <TimePicker
-              label="Start Time"
-              value={
-                period.startTime ? dayjs(period.startTime, "hh:mm A") : null
-              }
-              onChange={(newValue) => {
-                const formattedTime = newValue
-                  ? newValue.format("hh:mm A")
-                  : "";
-                const newPeriods = [...newTimeTable.periods];
-                newPeriods[index].startTime = formattedTime;
-                setNewTimeTable((prev) => ({
-                  ...prev,
-                  periods: newPeriods,
-                }));
+        <Grid container spacing={3}>
+          {/* Class Selection */}
+          <Grid item xs={12} md={6}>
+            <Typography variant="subtitle2" gutterBottom>
+              Class
+            </Typography>
+            <Select
+              fullWidth
+              value={newTimeTable.classId}
+              onChange={(e) => handleClassSelection(e.target.value)}
+              sx={{
+                backgroundColor: "background.paper",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "rgba(0, 0, 0, 0.1)",
+                },
               }}
-              sx={{ mt: 1, width: "100%" }}
-            />
-            <TimePicker
-              label="End Time"
-              value={period.endTime ? dayjs(period.endTime, "hh:mm A") : null}
-              onChange={(newValue) => {
-                const formattedTime = newValue
-                  ? newValue.format("hh:mm A")
-                  : "";
-                const newPeriods = [...newTimeTable.periods];
-                newPeriods[index].endTime = formattedTime;
-                setNewTimeTable((prev) => ({
-                  ...prev,
-                  periods: newPeriods,
-                }));
+            >
+              {classes.map((cls) => (
+                <MenuItem key={cls._id} value={cls._id}>
+                  {cls.name} - {cls.section}
+                </MenuItem>
+              ))}
+            </Select>
+          </Grid>
+
+          {/* Day Selection */}
+          <Grid item xs={12} md={6}>
+            <Typography variant="subtitle2" gutterBottom>
+              Day
+            </Typography>
+            <Select
+              fullWidth
+              value={newTimeTable.day}
+              onChange={(e) => handleDaySelection(e.target.value)}
+              sx={{
+                backgroundColor: "background.paper",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "rgba(0, 0, 0, 0.1)",
+                },
               }}
-              sx={{ mt: 1, width: "100%" }}
-            />
-          </LocalizationProvider>
+            >
+              {[
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+              ].map((day) => (
+                <MenuItem key={day} value={day}>
+                  {day}
+                </MenuItem>
+              ))}
+            </Select>
+          </Grid>
         </Grid>
-      ))}
 
-      <Grid item xs={12}>
-        <Button
-          variant="outlined"
-          color="secondary"
-          startIcon={<AddIcon />}
-          onClick={addPeriod}
-          disabled={!newTimeTable.classId || !newTimeTable.day}
-        >
-          Add Period
-        </Button>
-      </Grid>
+        <Box sx={{ mt: 4 }}>
+          {newTimeTable.periods.map((period, index) => (
+            <Paper
+              key={index}
+              elevation={1}
+              sx={{
+                p: 3,
+                mb: 3,
+                borderRadius: 2,
+                backgroundColor: "rgba(0, 0, 0, 0.02)",
+              }}
+            >
+              <Box
+                sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}
+              >
+                <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                  Period {index + 1}
+                </Typography>
+                {index > 0 && (
+                  <Tooltip title="Remove Period">
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        const newPeriods = newTimeTable.periods.filter(
+                          (_, i) => i !== index
+                        );
+                        setNewTimeTable((prev) => ({
+                          ...prev,
+                          periods: newPeriods,
+                        }));
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </Box>
 
-      <Grid item xs={12}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleAddTimeTable}
-          disabled={!newTimeTable.classId || !newTimeTable.day}
-        >
-          Save Timetable
-        </Button>
-      </Grid>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Subject
+                  </Typography>
+                  <Select
+                    fullWidth
+                    value={period.subjectId}
+                    onChange={(e) => {
+                      const selectedSubject = classSubjects.find(
+                        (subject) => subject._id === e.target.value
+                      );
+                      handleSubjectSelection(index, selectedSubject);
+                    }}
+                    disabled={!newTimeTable.day}
+                    sx={{ backgroundColor: "background.paper" }}
+                  >
+                    {classSubjects.map((subject) => (
+                      <MenuItem key={subject._id} value={subject._id}>
+                        {subject.subjectName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </Grid>
+
+                {period.subjectId && (
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Teacher
+                    </Typography>
+                    <Select
+                      fullWidth
+                      value={period.teacher}
+                      onChange={(e) =>
+                        handleTeacherSelection(index, e.target.value)
+                      }
+                      sx={{ backgroundColor: "background.paper" }}
+                    >
+                      {freeTeachers.map((teacher) => (
+                        <MenuItem key={teacher._id} value={teacher._id}>
+                          {teacher.name} ({teacher.subject})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </Grid>
+                )}
+
+                <Grid item xs={12} md={6}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <TimePicker
+                      label="Start Time"
+                      value={
+                        period.startTime
+                          ? dayjs(period.startTime, "hh:mm A")
+                          : null
+                      }
+                      onChange={(newValue) => {
+                        const formattedTime = newValue
+                          ? newValue.format("hh:mm A")
+                          : "";
+                        const newPeriods = [...newTimeTable.periods];
+                        newPeriods[index].startTime = formattedTime;
+                        setNewTimeTable((prev) => ({
+                          ...prev,
+                          periods: newPeriods,
+                        }));
+                      }}
+                      sx={{ width: "100%" }}
+                    />
+                  </LocalizationProvider>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <TimePicker
+                      label="End Time"
+                      value={
+                        period.endTime ? dayjs(period.endTime, "hh:mm A") : null
+                      }
+                      onChange={(newValue) => {
+                        const formattedTime = newValue
+                          ? newValue.format("hh:mm A")
+                          : "";
+                        const newPeriods = [...newTimeTable.periods];
+                        newPeriods[index].endTime = formattedTime;
+                        setNewTimeTable((prev) => ({
+                          ...prev,
+                          periods: newPeriods,
+                        }));
+                      }}
+                      sx={{ width: "100%" }}
+                    />
+                  </LocalizationProvider>
+                </Grid>
+              </Grid>
+            </Paper>
+          ))}
+        </Box>
+
+        <Box sx={{ display: "flex", gap: 2, mt: 4 }}>
+          <Button
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={addPeriod}
+            disabled={!newTimeTable.classId || !newTimeTable.day}
+            sx={{
+              borderRadius: 2,
+              textTransform: "none",
+            }}
+          >
+            Add Period
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={handleAddTimeTable}
+            disabled={!newTimeTable.classId || !newTimeTable.day}
+            sx={{
+              borderRadius: 2,
+              textTransform: "none",
+              px: 4,
+            }}
+          >
+            Save Timetable
+          </Button>
+        </Box>
+      </Paper>
 
       <Snackbar
         open={notification.open}
@@ -404,7 +493,7 @@ const AddClassTimeTable = ({ onTimeTableAdded }) => {
           {notification.message}
         </Alert>
       </Snackbar>
-    </Grid>
+    </Box>
   );
 };
 

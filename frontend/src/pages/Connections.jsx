@@ -17,6 +17,7 @@ import {
   deleteConnection,
 } from "../services/connectionService";
 import { useToast } from "../context/ToastContext";
+import Loader from "../components/Loader/Loader";
 
 const Connections = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -143,11 +144,7 @@ const Connections = () => {
     });
 
   if (loading) {
-    return (
-      <div className="p-6 text-center">
-        <p>Loading connections...</p>
-      </div>
-    );
+    return <Loader />;
   }
 
   const handleProfessionChange = (e) => {

@@ -21,6 +21,7 @@ import {
   deleteNotice,
 } from "../services/noticeService";
 import { useToast } from "../context/ToastContext";
+import Loader from "../components/Loader/Loader";
 
 const Notices = () => {
   const [notices, setNotices] = useState([]);
@@ -142,11 +143,7 @@ const Notices = () => {
     });
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <CircularProgress />
-      </div>
-    );
+    return <Loader />;
   }
 
   return (

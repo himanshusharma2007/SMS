@@ -9,21 +9,8 @@ import {
 } from "lucide-react";
 import SubmissionService from "../services/submissionservice";
 import { useToast } from "../context/ToastContext";
+import Loader from "../components/Loader/Loader";
 
-/*************  ✨ Codeium Command ⭐  *************/
-/**
- * CustomButton component for rendering a stylized button with various states.
- *
- * @param {ReactNode} children - The content to be displayed inside the button.
- * @param {function} onClick - Event handler for the button click.
- * @param {boolean} [disabled=false] - Flag to disable the button.
- * @param {string} [variant="primary"] - The style variant of the button, can be "primary", "secondary", or "success".
- * @param {string} [className=""] - Additional classes to customize the button styling.
- *
- * @returns {JSX.Element} A customizable button component.
- */
-
-/******  8fe1f29f-96d6-4f41-af92-0ec2f44192c9  *******/
 const CustomButton = ({
   children,
   onClick,
@@ -198,7 +185,10 @@ const AssessmentQuestions = () => {
   const handleSubmit = async (status = "SUBMITTED") => {
     try {
       setError(null);
-      const response = await SubmissionService.submitTest(submission._id, submission.answers);
+      const response = await SubmissionService.submitTest(
+        submission._id,
+        submission.answers
+      );
       showToast("Test submitted successfully", "success");
       navigate(`/assesments-result/${response.data._id}`);
     } catch (error) {
@@ -208,13 +198,7 @@ const AssessmentQuestions = () => {
   };
 
   if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <CustomCard>
-          <div className="text-center py-8">Loading test data...</div>
-        </CustomCard>
-      </div>
-    );
+    return <Loader />;
   }
 
   if (error) {
