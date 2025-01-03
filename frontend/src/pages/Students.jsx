@@ -33,6 +33,8 @@ const Student = () => {
         ]);
         setStudents(studentsResponse.data);
         setClasses(classesResponse.data);
+        console.log(studentsResponse.data)
+        console.log(classesResponse.data)
         showToast("Student Loaded successfully", "success");
       } catch (err) {
         setError(err.message || "Failed to fetch data");

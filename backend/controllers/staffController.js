@@ -136,7 +136,7 @@ exports.getStaff = async (req, res) => {
 
 exports.getAllStaff = async (req, res) => {
   try {
-    const staffs = await Department.find({isActive: true}).populate("staffMembers");
+    const staffs = await Department.find().populate("staffMembers");
     return res.status(200).json({ message: "get all staff", data: staffs });
   } catch (error) {
     return res.status(400).json({ error: error.message });

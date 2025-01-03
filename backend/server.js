@@ -24,6 +24,7 @@ const liveSessionRouter = require("./routes/liveSessionRoutes");
 const testRouter = require("./routes/testRouter");
 const submissionRouter = require("./routes/submissionRouter");
 const dashboardRoutes = require("./routes/adminDashboardRoutes");
+const driverRoutes = require("./routes/driverRoutes");
 
 const path = require("path");
 
@@ -45,7 +46,7 @@ app.use(cookieParser());
 // );
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173", "http://localhost:5174"],
     credentials: true,
   })
 );
@@ -69,6 +70,7 @@ app.use("/api/staff-attendance", staffAttendanceRouter);
 app.use("/api/live-sessions", liveSessionRouter);
 app.use("/api/tests", testRouter);
 app.use("/api/submission", submissionRouter);
+app.use("/api/driver", driverRoutes);
 // app.get("*", (req, res) => {
 //   res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 // });

@@ -17,6 +17,7 @@ const createDepartment = async () => {
       "Finance",
       "Support and Maintenance",
       "Library",
+      "Transtport",
       "IT",
       "Sports and Extracurricular",
     ];
