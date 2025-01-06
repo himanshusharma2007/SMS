@@ -19,7 +19,6 @@ const Student = () => {
   const entriesPerPage = 10;
 
   // Modals
-  const [editingStudent, setEditingStudent] = useState(null);
   const [studentToDelete, setStudentToDelete] = useState(null);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
   // Fetch initial data
@@ -31,6 +30,7 @@ const Student = () => {
           StudentService.getAllStudents(),
           ClassService.getAllClasses(),
         ]);
+        console.log('studentsResponse.data', studentsResponse.data)
         setStudents(studentsResponse.data);
         setClasses(classesResponse.data);
         showToast("Student Loaded successfully", "success");

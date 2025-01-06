@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import SubmissionService from "../services/submissionservice";
 import { useToast } from "../context/ToastContext";
+import Loader from "../components/Loader/Loader";
 
 const CustomButton = ({
   children,
@@ -184,7 +185,10 @@ const AssessmentQuestions = () => {
   const handleSubmit = async (status = "SUBMITTED") => {
     try {
       setError(null);
-      const response = await SubmissionService.submitTest(submission._id, submission.answers);
+      const response = await SubmissionService.submitTest(
+        submission._id,
+        submission.answers
+      );
       showToast("Test submitted successfully", "success");
       navigate(`/assesments-result/${response.data._id}`);
     } catch (error) {
@@ -194,13 +198,7 @@ const AssessmentQuestions = () => {
   };
 
   if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <CustomCard>
-          <div className="text-center py-8">Loading test data...</div>
-        </CustomCard>
-      </div>
-    );
+    return <Loader />;
   }
 
   if (error) {

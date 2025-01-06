@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import SubmissionService from "../services/submissionservice";
 import { useToast } from "../context/ToastContext";
+import Loader from "../components/Loader/Loader";
 
 const AssessmentResult = () => {
   const { submissionId } = useParams();
@@ -96,11 +97,7 @@ const AssessmentResult = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-gray-600">Loading results...</div>
-      </div>
-    );
+    return <Loader />;
   }
 
   if (error) {

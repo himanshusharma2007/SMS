@@ -136,7 +136,8 @@ const updateLiveSession = async (req, res) => {
 const updateSessionStatus = async (req, res) => {
   try {
     const session = await LiveSession.findById(req.params.id);
-
+    console.log("req.params.id", session);
+    console.log("req.body", req.body);
     if (!session) {
       return res.status(404).json({
         success: false,
@@ -150,8 +151,17 @@ const updateSessionStatus = async (req, res) => {
       completed: [],
       cancelled: [],
     };
-
+    console.log(
+      "validTransitions[session.status]",
+      validTransitions[session.status]
+    );
+    console.log(
+      "validTransitions[session.status].includes(req.body.status)",
+      !validTransitions[session.status].includes(req.body.status)
+    );
     if (!validTransitions[session.status].includes(req.body.status)) {
+      console.log("checked");
+
       return res.status(400).json({
         success: false,
         message: `Invalid status transition from ${session.status} to ${req.body.status}`,

@@ -33,6 +33,7 @@ import {
 } from "@mui/icons-material";
 import ReceiptModal from "../modals/ReceiptModal";
 import { useToast } from "../context/ToastContext";
+import Loader from "../components/Loader/Loader";
 
 const StudentFeeManagementPage = () => {
   const [students, setStudents] = useState([]);
@@ -66,7 +67,10 @@ const StudentFeeManagementPage = () => {
               };
             } catch (err) {
               console.error("Error fetching class details:", err);
-              showToast(`Failed to fetch class details for ${student.name}`, "error");
+              showToast(
+                `Failed to fetch class details for ${student.name}`,
+                "error"
+              );
               return {
                 ...student,
                 classDetails: { name: "N/A", section: "N/A" },
@@ -75,11 +79,15 @@ const StudentFeeManagementPage = () => {
           })
         );
         setStudents(studentsWithClassDetails);
-        showToast(`Loaded ${studentsWithClassDetails.length} students`, "success");
+        showToast(
+          `Loaded ${studentsWithClassDetails.length} students`,
+          "success"
+        );
 
         const classes = new Set(
           studentsWithClassDetails.map(
-            (student) => `${student.classDetails.name}-${student.classDetails.section}`
+            (student) =>
+              `${student.classDetails.name}-${student.classDetails.section}`
           )
         );
         setUniqueClasses(Array.from(classes).sort());
@@ -113,7 +121,14 @@ const StudentFeeManagementPage = () => {
 
   const handleClassChange = (event) => {
     setSelectedClass(event.target.value);
-    showToast(`Filtered by ${event.target.value === "all" ? "all classes" : `class ${event.target.value}`}`, "info");
+    showToast(
+      `Filtered by ${
+        event.target.value === "all"
+          ? "all classes"
+          : `class ${event.target.value}`
+      }`,
+      "info"
+    );
   };
 
   const filteredStudents = students.filter((student) => {
@@ -154,11 +169,7 @@ const StudentFeeManagementPage = () => {
   };
 
   if (loading) {
-    return (
-      <Box className="p-6">
-        <Typography>Loading...</Typography>
-      </Box>
-    );
+    return <Loader />;
   }
 
   if (error) {

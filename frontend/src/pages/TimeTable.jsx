@@ -14,6 +14,7 @@ import {
   InputLabel,
   Select,
   Modal,
+  CircularProgress,
 } from "@mui/material";
 import { FiSettings, FiClock, FiPlus, FiEdit, FiTrash2 } from "react-icons/fi";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
@@ -25,6 +26,7 @@ import TimeTableService from "../services/timeTableServices";
 import { getAllClasses } from "../services/classService";
 import { useToast } from "../context/ToastContext";
 import EditClassTimeTable from "../forms/EditClassTimeTable";
+import Loader from "../components/Loader/Loader";
 
 const localizer = momentLocalizer(moment);
 
@@ -54,6 +56,9 @@ const TimeTable = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [timeTables, setTimeTables] = useState([]);
+  const [isLoadingClasses, setIsLoadingClasses] = useState(true);
+  const [isLoadingTimetables, setIsLoadingTimetables] = useState(false);
+  const [isDeletingTimetable, setIsDeletingTimetable] = useState(null);
   const showToast = useToast();
   const navigate = useNavigate();
 
@@ -64,6 +69,7 @@ const TimeTable = () => {
 
   // Fetch classes for dropdown
   const fetchClasses = async () => {
+    setIsLoadingClasses(true);
     try {
       const response = await getAllClasses();
       setClasses(response.data);
@@ -76,11 +82,14 @@ const TimeTable = () => {
     } catch (error) {
       showToast("Error fetching classes", "error");
       console.error("Error fetching classes:", error);
+    } finally {
+      setIsLoadingClasses(false);
     }
   };
 
   // Fetch timetables for a specific class
   const fetchTimeTables = async (classId) => {
+    setIsLoadingTimetables(true);
     try {
       const timetableData = await TimeTableService.getClassTimeTable(classId);
       showToast("Time table data fetched successfully", "success");
@@ -120,6 +129,8 @@ const TimeTable = () => {
       console.error("Error fetching timetables:", error);
       setEvents([]);
       setTimeTables([]);
+    } finally {
+      setIsLoadingTimetables(false);
     }
   };
 
@@ -132,6 +143,7 @@ const TimeTable = () => {
 
   // Handle Delete Timetable
   const handleDeleteTimeTable = async (timetableId) => {
+    setIsDeletingTimetable(timetableId);
     try {
       await TimeTableService.deleteTimeTable(timetableId);
       showToast("Timetable deleted successfully", "success");
@@ -140,6 +152,8 @@ const TimeTable = () => {
     } catch (error) {
       showToast("Error deleting timetable", "error");
       console.error("Error deleting timetable:", error);
+    } finally {
+      setIsDeletingTimetable(null);
     }
   };
 
@@ -169,6 +183,10 @@ const TimeTable = () => {
       },
     };
   };
+
+  if (isLoadingClasses) {
+    return <Loader />;
+  }
 
   return (
     <Box
@@ -204,8 +222,12 @@ const TimeTable = () => {
           bgcolor: "white",
           borderRadius: "12px",
           mb: 2,
+          position: "relative",
         }}
       >
+        {/* Loading overlay for timetable data */}
+        {isLoadingTimetables && <Loader />}
+
         {/* Class Selection Dropdown */}
         <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
           <FormControl variant="outlined" sx={{ minWidth: 300 }}>
@@ -214,6 +236,7 @@ const TimeTable = () => {
               value={selectedClass}
               onChange={handleClassChange}
               label="Select Class"
+              disabled={isLoadingTimetables}
             >
               {classes.map((classItem) => (
                 <MenuItem key={classItem._id} value={classItem._id}>
@@ -234,6 +257,7 @@ const TimeTable = () => {
                 bgcolor: showSettings ? "#1565c0" : "#1976d2",
                 "&:hover": { bgcolor: "#1565c0" },
               }}
+              disabled={isLoadingTimetables}
             >
               Time Settings
             </Button>
@@ -244,6 +268,7 @@ const TimeTable = () => {
                 bgcolor: "#e3f2fd",
                 "&:hover": { bgcolor: "#bbdefb" },
               }}
+              disabled={isLoadingTimetables}
             >
               <FiClock />
             </IconButton>
@@ -256,6 +281,7 @@ const TimeTable = () => {
               bgcolor: "#2e7d32",
               "&:hover": { bgcolor: "#1b5e20" },
             }}
+            disabled={isLoadingTimetables}
           >
             Add Class Time Table
           </Button>
@@ -413,23 +439,52 @@ const TimeTable = () => {
                 {timetable.day} - {timetable.class.name}{" "}
                 {timetable.class.section}
               </Typography>
+
               <Box>
                 <IconButton
                   color="primary"
-                  // onClick={() => handleEditTimeTable(timetable)}
                   onClick={() => navigate(`/edit-timetable/${timetable._id}`)}
+                  disabled={isDeletingTimetable === timetable._id}
                 >
                   <FiEdit />
                 </IconButton>
                 <IconButton
                   color="error"
                   onClick={() => handleDeleteTimeTable(timetable._id)}
+                  disabled={isDeletingTimetable === timetable._id}
                 >
-                  <FiTrash2 />
+                  {isDeletingTimetable === timetable._id ? (
+                    <CircularProgress size={20} color="error" />
+                  ) : (
+                    <FiTrash2 />
+                  )}
                 </IconButton>
               </Box>
             </Paper>
           ))}
+          {timeTables.length === 0 && !isLoadingTimetables && (
+            <Paper
+              elevation={1}
+              sx={{
+                p: 3,
+                textAlign: "center",
+                bgcolor: "#f8f9fa",
+                borderRadius: "8px",
+              }}
+            >
+              <Typography color="textSecondary">
+                No timetables available for this class
+              </Typography>
+              <Button
+                variant="outlined"
+                startIcon={<FiPlus />}
+                onClick={() => navigate("/add-class-timetable")}
+                sx={{ mt: 2 }}
+              >
+                Add Timetable
+              </Button>
+            </Paper>
+          )}
         </Box>
       </Paper>
 
