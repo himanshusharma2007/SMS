@@ -20,18 +20,21 @@ const AttendancePage = () => {
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
-    showToast(`Viewing ${newValue === 0 ? 'Teachers' : 'Students'} attendance`, "info");
+    showToast(
+      `Viewing ${newValue === 0 ? "Teachers" : "Students"} attendance`,
+      "info"
+    );
   };
 
   return (
     <div className="p-6">
       <div className="mb-10 flex justify-between items-center">
         <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-          Teachers & Students Attendance
+          Students Attendance
         </h1>
         <DigitalClock />
       </div>
-      <Tabs
+      {/* <Tabs
         value={activeTab}
         onChange={handleTabChange}
         right
@@ -48,14 +51,14 @@ const AttendancePage = () => {
             >
               Student Attendace Calendar
             </Button>
-          )}
-      </Tabs>
+          )} 
+      </Tabs> */}
 
-      {activeTab === 0 ? (
+      {/* {activeTab === 0 ? (
         <TeacherList />
-      ) : (
-        <ClassList showActualAttendance={true} />
-      )}
+      ) : ( */}
+      <ClassList showActualAttendance={true} />
+      {/* )} */}
     </div>
   );
 };

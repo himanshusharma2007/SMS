@@ -15,6 +15,9 @@ import getStudentByClass from "../services/studentServices";
 import { useToast } from "../context/ToastContext";
 import AddLiveSessionModal from "../modals/AddLiveSessionModal";
 import Loader from "../components/Loader/Loader";
+import { selectUser } from "../store/slices/userSlice";
+import { useSelector } from "react-redux";
+
 const LiveSessionManagement = () => {
   const [sessions, setSessions] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
@@ -43,6 +46,7 @@ const LiveSessionManagement = () => {
   const [formData, setFormData] = useState(initialFormState);
 
   const showToast = useToast();
+  const user = useSelector(selectUser);
 
   // Fetch initial data
   useEffect(() => {
@@ -292,14 +296,14 @@ const LiveSessionManagement = () => {
               />
               <BsSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
-            {/* <Link to> */}
-            <button
-              onClick={() => setShowModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
-            >
-              <MdAdd /> New Session
-            </button>
-            {/* </Link> */}
+            {user?.role === "teacher" && (
+              <button
+                onClick={() => setShowModal(true)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+              >
+                <MdAdd /> New Session
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -357,15 +361,17 @@ const LiveSessionManagement = () => {
                   >
                     <MdVideoCall className="text-xl" />
                   </button>
-                  <button
-                    onClick={() => {
-                      setSelectedSession(session);
-                      setShowDeleteModal(true);
-                    }}
-                    className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                  >
-                    <MdDelete className="text-xl" />
-                  </button>
+                  {user?.role === "teacher" && (
+                    <button
+                      onClick={() => {
+                        setSelectedSession(session);
+                        setShowDeleteModal(true);
+                      }}
+                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                    >
+                      <MdDelete className="text-xl" />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

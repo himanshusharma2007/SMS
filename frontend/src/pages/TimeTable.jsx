@@ -25,8 +25,9 @@ import { useNavigate } from "react-router-dom";
 import TimeTableService from "../services/timeTableServices";
 import { getAllClasses } from "../services/classService";
 import { useToast } from "../context/ToastContext";
-import EditClassTimeTable from "../forms/EditClassTimeTable";
 import Loader from "../components/Loader/Loader";
+import { selectUser } from "../store/slices/userSlice";
+import { useSelector } from "react-redux";
 
 const localizer = momentLocalizer(moment);
 
@@ -61,6 +62,7 @@ const TimeTable = () => {
   const [isDeletingTimetable, setIsDeletingTimetable] = useState(null);
   const showToast = useToast();
   const navigate = useNavigate();
+  const user = useSelector(selectUser);
 
   // Fetch all classes on component mount
   useEffect(() => {
@@ -273,18 +275,20 @@ const TimeTable = () => {
               <FiClock />
             </IconButton>
           </Box>
-          <Button
-            variant="contained"
-            startIcon={<FiPlus />}
-            onClick={() => navigate("/add-class-timetable")}
-            sx={{
-              bgcolor: "#2e7d32",
-              "&:hover": { bgcolor: "#1b5e20" },
-            }}
-            disabled={isLoadingTimetables}
-          >
-            Add Class Time Table
-          </Button>
+          {(user?.role === "admin" || user?.role === "superAdmin") && (
+            <Button
+              variant="contained"
+              startIcon={<FiPlus />}
+              onClick={() => navigate("/add-class-timetable")}
+              sx={{
+                bgcolor: "#2e7d32",
+                "&:hover": { bgcolor: "#1b5e20" },
+              }}
+              disabled={isLoadingTimetables}
+            >
+              Add Class Time Table
+            </Button>
+          )}
         </Box>
 
         {showSettings && (
@@ -419,73 +423,75 @@ const TimeTable = () => {
         </Box>
 
         {/* Timetable List with Edit and Delete Buttons */}
-        <Box sx={{ mt: 3 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Timetables
-          </Typography>
-          {timeTables.map((timetable) => (
-            <Paper
-              key={timetable._id}
-              elevation={2}
-              sx={{
-                p: 2,
-                mb: 2,
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Typography>
-                {timetable.day} - {timetable.class.name}{" "}
-                {timetable.class.section}
-              </Typography>
-
-              <Box>
-                <IconButton
-                  color="primary"
-                  onClick={() => navigate(`/edit-timetable/${timetable._id}`)}
-                  disabled={isDeletingTimetable === timetable._id}
-                >
-                  <FiEdit />
-                </IconButton>
-                <IconButton
-                  color="error"
-                  onClick={() => handleDeleteTimeTable(timetable._id)}
-                  disabled={isDeletingTimetable === timetable._id}
-                >
-                  {isDeletingTimetable === timetable._id ? (
-                    <CircularProgress size={20} color="error" />
-                  ) : (
-                    <FiTrash2 />
-                  )}
-                </IconButton>
-              </Box>
-            </Paper>
-          ))}
-          {timeTables.length === 0 && !isLoadingTimetables && (
-            <Paper
-              elevation={1}
-              sx={{
-                p: 3,
-                textAlign: "center",
-                bgcolor: "#f8f9fa",
-                borderRadius: "8px",
-              }}
-            >
-              <Typography color="textSecondary">
-                No timetables available for this class
-              </Typography>
-              <Button
-                variant="outlined"
-                startIcon={<FiPlus />}
-                onClick={() => navigate("/add-class-timetable")}
-                sx={{ mt: 2 }}
+        {(user?.role === "admin" || user?.role === "superAdmin") && (
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Timetables
+            </Typography>
+            {timeTables.map((timetable) => (
+              <Paper
+                key={timetable._id}
+                elevation={2}
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
               >
-                Add Timetable
-              </Button>
-            </Paper>
-          )}
-        </Box>
+                <Typography>
+                  {timetable.day} - {timetable.class.name}{" "}
+                  {timetable.class.section}
+                </Typography>
+
+                <Box>
+                  <IconButton
+                    color="primary"
+                    onClick={() => navigate(`/edit-timetable/${timetable._id}`)}
+                    disabled={isDeletingTimetable === timetable._id}
+                  >
+                    <FiEdit />
+                  </IconButton>
+                  <IconButton
+                    color="error"
+                    onClick={() => handleDeleteTimeTable(timetable._id)}
+                    disabled={isDeletingTimetable === timetable._id}
+                  >
+                    {isDeletingTimetable === timetable._id ? (
+                      <CircularProgress size={20} color="error" />
+                    ) : (
+                      <FiTrash2 />
+                    )}
+                  </IconButton>
+                </Box>
+              </Paper>
+            ))}
+            {timeTables.length === 0 && !isLoadingTimetables && (
+              <Paper
+                elevation={1}
+                sx={{
+                  p: 3,
+                  textAlign: "center",
+                  bgcolor: "#f8f9fa",
+                  borderRadius: "8px",
+                }}
+              >
+                <Typography color="textSecondary">
+                  No timetables available for this class
+                </Typography>
+                <Button
+                  variant="outlined"
+                  startIcon={<FiPlus />}
+                  onClick={() => navigate("/add-class-timetable")}
+                  sx={{ mt: 2 }}
+                >
+                  Add Timetable
+                </Button>
+              </Paper>
+            )}
+          </Box>
+        )}
       </Paper>
 
       <Menu
