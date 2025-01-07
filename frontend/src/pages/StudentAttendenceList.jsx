@@ -26,7 +26,7 @@ const StudentAttendance = ({ setCurrentView }) => {
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [className, setClassName] = useState("")
+  const [className, setClassName] = useState("");
 
   // Fetch students and attendance data
   useEffect(() => {
@@ -35,23 +35,26 @@ const StudentAttendance = ({ setCurrentView }) => {
       setError(null);
       try {
         // Format the selected date to ISO string for consistent comparison
-        const formattedDate = selectedDate.toISOString().split('T')[0];
+        const formattedDate = selectedDate.toISOString().split("T")[0];
 
         // Fetch students for the specific class
-        const studentsResponse = await StudentService.getStudentByClass(classId);
-        console.log('studentsResponse', studentsResponse)
-        setClassName(studentsResponse.data.class.name)
-        
+        const studentsResponse = await StudentService.getStudentByClass(
+          classId
+        );
+        console.log("studentsResponse", studentsResponse);
+        setClassName(studentsResponse.data.class.name);
+
         // Fetch attendance data for the class
-        const attendanceResponse = await StudentAttendanceService.getAllClassStudentAttendance(classId);
-        console.log('attendanceResponse', attendanceResponse)
+        const attendanceResponse =
+          await StudentAttendanceService.getAllClassStudentAttendance(classId);
+        console.log("attendanceResponse", attendanceResponse);
         // Merge student data with attendance records
-        const mergedStudentData = getMergedStudentData(
-          studentsResponse.data.student, 
+        const mergedStudentData = await getMergedStudentData(
+          studentsResponse.data.student,
           attendanceResponse.data,
           formattedDate
         );
-  console.log('mergedStudentData', mergedStudentData)
+        console.log("mergedStudentData", mergedStudentData);
         // Set students and filtered students
         setStudents(mergedStudentData);
         setFilteredStudents(mergedStudentData);
@@ -69,25 +72,32 @@ const StudentAttendance = ({ setCurrentView }) => {
   }, [classId, selectedDate]);
 
   // Merge student data with attendance records
-  const getMergedStudentData = (studentsData, attendanceData, selectedDate) => {
-    return studentsData.map((student) => {
-      const attendanceRecord = attendanceData.find(
-        (record) => 
-          record.student._id === student._id && 
-          new Date(record.date).toISOString().split('T')[0] === selectedDate
-      );
-
-      return {
-        id: student._id,
-        name: student.name,
-        email: student.email,
-        rollNumber: student.rollNumber,
-        status: attendanceRecord ? attendanceRecord.status : "pending",
-        entryTime: attendanceRecord?.entryTime || null,
-        attendanceRecord: attendanceRecord || null,
-        attendanceId: attendanceRecord?._id || null,
-      };
-    });
+  const getMergedStudentData = async (studentsData, attendanceData, selectedDate) => {
+    // Use Promise.all to properly handle async operations inside map
+    const data = await Promise.all(
+      studentsData.map(async (student) => {
+        // Find attendance record matching the student and selected date
+        const attendanceRecord = attendanceData.find(
+          (record) =>
+            record.student._id === student._id &&
+            new Date(record.date).toISOString().split("T")[0] === selectedDate
+        );
+  
+        // Prepare the per-student data
+        return {
+          id: student._id,
+          name: student.name,
+          email: student.email,
+          rollNumber: student.rollNumber,
+          status: attendanceRecord ? attendanceRecord.status : "pending",
+          entryTime: attendanceRecord?.entryTime || null,
+          attendanceRecord: attendanceRecord || null,
+          attendanceId: attendanceRecord?._id || null,
+        };
+      })
+    );
+  
+    return data;
   };
 
   // Update attendance for a student
@@ -106,14 +116,15 @@ const StudentAttendance = ({ setCurrentView }) => {
       );
 
       // Update local state
-      setFilteredStudents((prev) => 
-        prev.map((student) => 
-          student.id === studentId 
+      setFilteredStudents((prev) =>
+        prev.map((student) =>
+          student.id === studentId
             ? {
                 ...student,
                 status: newStatus,
-                entryTime: newStatus === "present" ? attendanceData.entryTime : null,
-                attendanceRecord: response.data
+                entryTime:
+                  newStatus === "present" ? attendanceData.entryTime : null,
+                attendanceRecord: response.data,
               }
             : student
         )
@@ -128,13 +139,7 @@ const StudentAttendance = ({ setCurrentView }) => {
 
   // Export to CSV functionality
   const exportToCSV = () => {
-    const headers = [
-      "Date",
-      "Name",
-      "Roll Number", 
-      "Status", 
-      "Entry Time"
-    ];
+    const headers = ["Date", "Name", "Roll Number", "Status", "Entry Time"];
     const csvData = filteredStudents.map((student) => [
       selectedDate.toLocaleDateString(),
       student.name,
@@ -152,7 +157,10 @@ const StudentAttendance = ({ setCurrentView }) => {
     const url = URL.createObjectURL(blob);
 
     link.setAttribute("href", url);
-    link.setAttribute("download", `student_attendance_${selectedDate.toLocaleDateString()}.csv`);
+    link.setAttribute(
+      "download",
+      `student_attendance_${selectedDate.toLocaleDateString()}.csv`
+    );
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -326,9 +334,9 @@ const StudentAttendance = ({ setCurrentView }) => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredStudents.map((student) => {
-                      const isCurrentDate = 
-                        selectedDate.toISOString().split('T')[0] === 
-                        new Date().toISOString().split('T')[0];
+                      const isCurrentDate =
+                        selectedDate.toISOString().split("T")[0] ===
+                        new Date().toISOString().split("T")[0];
 
                       return (
                         <tr key={student.id} className="hover:bg-gray-50">
@@ -346,19 +354,22 @@ const StudentAttendance = ({ setCurrentView }) => {
                                 student.status
                               )}`}
                             >
-                              {student.status.charAt(0).toUpperCase() +
-                                student.status.slice(1)}
+                              {student?.status?.charAt(0).toUpperCase() +
+                                student?.status?.slice(1)}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div className="flex gap-3">
                               {/* Only show Present button for current date or if student is not already absent */}
-                              {(isCurrentDate || student.status !== "absent") && (
+                              {(isCurrentDate ||
+                                student.status !== "absent") && (
                                 <button
                                   onClick={() =>
                                     updateAttendance(student.id, "present")
                                   }
-                                  className={`${student.status === "absent" && "hidden"}  p-2 rounded-full transition-colors ${
+                                  className={`${
+                                    student.status === "absent" && "hidden"
+                                  }  p-2 rounded-full transition-colors ${
                                     student.status === "present"
                                       ? "bg-green-100 text-green-600"
                                       : "hover:bg-green-100 text-gray-400"
@@ -373,7 +384,9 @@ const StudentAttendance = ({ setCurrentView }) => {
                                 onClick={() =>
                                   updateAttendance(student.id, "absent")
                                 }
-                                className={`${student.status === "present" && "hidden"} p-2 rounded-full transition-colors ${
+                                className={`${
+                                  student.status === "present" && "hidden"
+                                } p-2 rounded-full transition-colors ${
                                   student.status === "absent"
                                     ? "bg-red-100 text-red-600"
                                     : "hover:bg-red-100 text-gray-400"
@@ -418,9 +431,10 @@ const StudentAttendance = ({ setCurrentView }) => {
               There are no students registered in this class
             </p>
           </div>
-        )}</div>
-        </div>
-      );
-    };
-    
-    export default StudentAttendance;
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default StudentAttendance;

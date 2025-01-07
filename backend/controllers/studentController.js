@@ -38,7 +38,7 @@ exports.getStudentByClass = async (req, res) => {
     const { id } = req.params;
     console.log("id ", id);
     const classData = await Class.findById(id);
-    const student = await Student.find({ class: classData._id, isActive: true});
+    const student = await Student.find({ class: classData._id});
     if (!student) {
       return res.status(404).json({ error: "Student not found" });
     }
