@@ -71,7 +71,7 @@ const StudentMarksPage = () => {
           <h1 className="text-2xl font-bold">Student Marks Management</h1>
           <p className="text-gray-600">View and manage student results</p>
         </div>
-        {user?.role === "admin" && (
+        {user?.role === "teacher" && (
           <button
             onClick={() => navigate("/add-student-marks")}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"

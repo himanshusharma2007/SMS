@@ -41,7 +41,7 @@ const menuConfig = {
     main: ["dashboard", "students", "teachers", "staff", "class"],
     academic: ["time-table", "student-marks", "result"],
     attendance: ["attendance", "staff-attendance"],
-    communication: ["parents", "notices", "connections"],
+    communication: ["notices", "connections"],
     finance: ["fee-reminder"],
     transport: ["transport"],
   },
@@ -52,7 +52,7 @@ const menuConfig = {
     communication: ["parents", "notices", "live-sessions", "connections"],
   },
   student: {
-    main: ["dashboard", "class"],
+    main: ["dashboard"],
     academic: ["time-table", "assesments", "result"],
     communication: ["notices", "live-sessions"],
   },
@@ -83,7 +83,7 @@ const menuItems = {
   result: { icon: FaGraduationCap, label: "Results", path: "/result" },
   attendance: {
     icon: FaCalendarAlt,
-    label: "Student Teacher Attendance",
+    label: "Student Attendance",
     path: "/attendance",
   },
   "staff-attendance": {

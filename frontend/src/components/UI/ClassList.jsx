@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
-  Paper, 
+import React, { useState, useEffect } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
   Button,
   CircularProgress,
-  Alert
-} from '@mui/material';
-import { Link } from 'react-router-dom';
-import { getAllClasses } from '../../services/classService'; // Adjust the import path as needed
+  Alert,
+} from "@mui/material";
+import { Link } from "react-router-dom";
+import { getAllClasses } from "../../services/classService"; // Adjust the import path as needed
 import { useToast } from "../../context/ToastContext";
 
 const ClassList = () => {
@@ -30,12 +30,15 @@ const ClassList = () => {
         if (fetchedClasses.data.length === 0) {
           showToast("No classes found in the system", "info");
         } else {
-          showToast(`Successfully loaded ${fetchedClasses.data.length} classes`, "success");
+          showToast(
+            `Successfully loaded ${fetchedClasses.data.length} classes`,
+            "success"
+          );
         }
       } catch (err) {
-        setError('Failed to fetch classes');
+        setError("Failed to fetch classes");
         showToast("Failed to load classes", "error");
-        console.error('Error fetching classes:', err);
+        console.error("Error fetching classes:", err);
       } finally {
         setIsLoading(false);
       }
@@ -84,12 +87,12 @@ const ClassList = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {classes.map((classItem) => (
-              <TableRow key={classItem.id}>
+            {classes.map((classItem, index) => (
+              <TableRow key={index}>
                 <TableCell>{classItem.name}</TableCell>
                 <TableCell>{classItem.students.length}</TableCell>
                 <TableCell>
-                  <Link 
+                  <Link
                     to={`/attendance/${classItem._id}`}
                     onClick={() => handleViewStudents(classItem)}
                   >
