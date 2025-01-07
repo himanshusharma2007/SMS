@@ -186,10 +186,10 @@ exports.addTeacher = async (req, res) => {
       }
     }
 
-    const department = await Department.findOne({ name: "Teaching" });
+    let department = await Department.findOne({ name: "Teaching" });
     if (!department) {
-      console.log("Error: Department not created");
-      return res.status(400).json({ error: "Department not created" });
+      department = await Department.create({name: "Teaching"})
+      console.log("Department not created");
     }
 
     const staff = new Staff({

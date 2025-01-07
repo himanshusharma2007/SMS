@@ -6,8 +6,7 @@ import {
 } from 'recharts';
 import { 
   Users, GraduationCap, UserCheck, IndianRupee, 
-  Clock, Mail, TrendingUp, Building, BookOpen,
-  CalendarCheck, BellRing, UserPlus, HeartPulse
+  Clock, BellRing, UserPlus, HeartPulse
 } from 'lucide-react';
 import AdminDashboardService from '../services/adminDashboardService';
 import { useToast } from '../context/ToastContext';

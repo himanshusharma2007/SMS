@@ -97,7 +97,6 @@ exports.createAdmin = async (req, res) => {
     await staff.save();
     console.log("Staff saved successfully.");
 
-
     newAdmin.password = "********";
     const sendRegistrationMail = await sendEmail(
       staff.email,
@@ -125,51 +124,81 @@ exports.createAdmin = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { loginId, password } = req.body
-    if (!loginId || !password) return res.status(400).json({ error: "All fields are required." })
-    const userData = (loginId[0] === "A") ?
-      (await Admin.findOne({ registrationNumber: loginId }).select("+password")) :
-      (loginId[0] === "T") ?
-        (await Teachers.findOne({ registrationNumber: loginId }).select("+password").populate("staffId")) :
-        (loginId[0] === "S") ?
-          (await Student.findOne({ registrationNumber: loginId }).select("+password")) :
-          (await Parents.findOne({ registrationNumber: loginId }).select("+password").populate("student"))
-    console.log("user", userData)
-    if (!userData) return res.status(400).json({ error: "Invalid credentials" });
-    const matchPassword = await bcrypt.compare(password, userData.password)
-    if (!matchPassword) return res.status(400).json({ error: "Invalid credentials" });
-    
+    const { loginId, password } = req.body;
+    if (!loginId || !password)
+      return res.status(400).json({ error: "All fields are required." });
+    const userData =
+      loginId[0] === "A"
+        ? await Admin.findOne({ registrationNumber: loginId }).select(
+            "+password"
+          )
+        : loginId[0] === "T"
+        ? await Teachers.findOne({ registrationNumber: loginId })
+            .select("+password")
+            .populate("staffId")
+        : loginId[0] === "S"
+        ? await Student.findOne({ registrationNumber: loginId }).select(
+            "+password"
+          )
+        : await Parents.findOne({ registrationNumber: loginId })
+            .select("+password")
+            .populate("student");
+    console.log("user", userData);
+    if (!userData)
+      return res.status(400).json({ error: "Invalid credentials" });
+    const matchPassword = await bcrypt.compare(password, userData.password);
+    if (!matchPassword)
+      return res.status(400).json({ error: "Invalid credentials" });
+
+    if (loginId[0] === "T") {
+      console.log("Teacher is Logging In kbse bichara  try krr rha he");
+      console.log("req.body", req.body);
+      console.log("userData", userData);
+    }
     // teacher
-    if(loginId[0] === "T" && !userData.staffId.isActive){
-      return res.status(401).json({error: "You are deleted by admin, contact to admin"});
+    if (loginId[0] === "T" && !userData.staffId.isActive) {
+      console.log(userData);
+      return res
+        .status(401)
+        .json({ error: "You are deleted by admin, contact to admin" });
     }
-    
+
     // student
-    if(loginId[0] === "S" && !userData.isActive){
-      return res.status(401).json({error: "You are remove. contact you teachers and admin"});
+    if (loginId[0] === "S" && !userData.isActive) {
+      return res
+        .status(401)
+        .json({ error: "You are remove. contact you teachers and admin" });
     }
-    
+
     // parents
-    if(loginId[0] === "P" && !userData.student.isActive){
-      return res.status(401).json({error: "Your children is removed, contact teachers and admin"});
+    if (loginId[0] === "P" && !userData.student.isActive) {
+      return res
+        .status(401)
+        .json({
+          error: "Your children is removed, contact teachers and admin",
+        });
     }
-    
-    const token = await generateToken(userData._id, loginId)
-    if (!token) return res.status(500).json({ error: "error in generate token, try again" });
+
+    const token = await generateToken(userData._id, loginId);
+    if (!token)
+      return res
+        .status(500)
+        .json({ error: "error in generate token, try again" });
     const expirationTime = 24 * 60 * 60 * 1000;
     res.cookie("token", token, {
       maxAge: expirationTime,
       httpOnly: true,
       secure: true,
-      sameSite: "strict"
+      sameSite: "strict",
     });
-    return res.status(200).json({ message: "Login successfully!", token, userData })
+    return res
+      .status(200)
+      .json({ message: "Login successfully!", token, userData });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: error.message });
   }
-}
-
+};
 
 exports.logout = async (req, res) => {
   try {

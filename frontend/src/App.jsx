@@ -48,7 +48,23 @@ import AddClassTimeTable from "./forms/AddClassTimeTable";
 import EditClassTimeTable from "./forms/EditClassTimeTable";
 import VehicleDetails from "./pages/TransportManagement/VehicleInfo";
 import VehicleForm from "./pages/TransportManagement/VehicleForm";
+import { fetchUser, setUser } from "./store/slices/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { selectUser } from "./store/slices/userSlice";
+import TeacherDashboard from "./pages/TeacherDashboard";
+import StudentDashboard from "./pages/StudentDashboard";
 const App = () => {
+  const user = useSelector(selectUser);
+  const [role, setRole] = useState(null);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(fetchUser()); // Call the thunk when the component mounts
+  }, [dispatch]);
+  useEffect(() => {
+    console.log("user roleeeeeeeeee", user?.role);
+    setRole(user?.role);
+  }, [user]);
   return (
     <BrowserRouter>
       <Routes>
@@ -130,9 +146,19 @@ const App = () => {
         <Route
           path="/dashboard"
           element={
-            <Layout>
-              <SuperAdminDashboard />
-            </Layout>
+            role === "admin" || role === "superAdmin" ? (
+              <Layout>
+                <SuperAdminDashboard />
+              </Layout>
+            ) : role === "teacher" ? (
+              <Layout>
+                <TeacherDashboard />
+              </Layout>
+            ) : (
+              <Layout>
+                <StudentDashboard />
+              </Layout>
+            )
           }
         />
         <Route

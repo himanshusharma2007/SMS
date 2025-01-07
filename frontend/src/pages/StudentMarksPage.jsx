@@ -4,6 +4,8 @@ import { studentMarksService } from "../services/studentMarksServices";
 import ResultModal from "../modals/ResultModal";
 import { useToast } from "../context/ToastContext";
 import Loader from "../components/Loader/Loader";
+import { selectUser } from "../store/slices/userSlice";
+import { useSelector } from "react-redux";
 const StudentMarksPage = () => {
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
@@ -14,6 +16,7 @@ const StudentMarksPage = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const showToast = useToast();
+  const user = useSelector(selectUser);
 
   // Get unique classes from students
   const getUniqueClasses = (students) => {
@@ -68,13 +71,14 @@ const StudentMarksPage = () => {
           <h1 className="text-2xl font-bold">Student Marks Management</h1>
           <p className="text-gray-600">View and manage student results</p>
         </div>
-
-        <button
-          onClick={() => navigate("/add-student-marks")}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Add New Result
-        </button>
+        {user?.role === "admin" && (
+          <button
+            onClick={() => navigate("/add-student-marks")}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Add New Result
+          </button>
+        )}
       </div>
 
       <div className="mb-6">
@@ -149,12 +153,14 @@ const StudentMarksPage = () => {
                   >
                     View Result
                   </button>
-                  <button
-                    onClick={() => navigate(`/edit-marks/${student._id}`)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    Edit
-                  </button>
+                  {user?.role === "teacher" && (
+                    <button
+                      onClick={() => navigate(`/edit-marks/${student._id}`)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      Edit
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

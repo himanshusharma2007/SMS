@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import TestService from "../services/testService";
 import { useToast } from "../context/ToastContext";
 import Loader from "../components/Loader/Loader";
+import { selectUser } from "../store/slices/userSlice";
+import { useSelector } from "react-redux";
 
 const TestManagement = () => {
   const navigate = useNavigate();
@@ -12,6 +14,7 @@ const TestManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const showToast = useToast();
+  const user = useSelector(selectUser);
 
   useEffect(() => {
     const fetchTests = async () => {
@@ -90,6 +93,16 @@ const TestManagement = () => {
   const handleCreateTest = () => {
     navigate("/test-form");
     showToast("Starting new test creation", "info");
+  };
+
+  const handleTestClick = (test) => {
+    {
+      if (user?.role === "admin" || user?.role === "superAdmin") {
+        navigate(`/submission/all/${test._id}`);
+      } else {
+        navigate(`/assesments/${test._id}`);
+      }
+    }
   };
 
   if (loading) {
@@ -211,7 +224,7 @@ const TestManagement = () => {
             return (
               <div
                 key={test._id}
-                onClick={() => navigate(`/submission/all/${test._id}`)}
+                onClick={() => handleTestClick(test)}
                 className="group bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-100 hover:border-gray-200"
               >
                 <div className="p-6">

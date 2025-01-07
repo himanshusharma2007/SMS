@@ -1,8 +1,8 @@
 // components/Login.jsx
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import kids from "../assets/images/kids.avif";
+import kids from "../assets/images/schoolcrm.jpg";
 import AuthService from "../services/authService";
 import ProfileService from "../services/profileService";
 import { setUser } from "../store/slices/userSlice";
@@ -14,6 +14,7 @@ function LoginPage() {
   const [role, setRole] = useState("Admin");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const user = useSelector((state) => state.user);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -30,8 +31,9 @@ function LoginPage() {
       if (loginResponse.message === "Login successfully!") {
         try {
           const profileResponse = await ProfileService.getProfile();
-          console.log(profileResponse)
+          console.log(profileResponse);
           dispatch(setUser(profileResponse.user));
+          console.log("login user", user);
           showToast("Login successful", "success");
           navigate("/dashboard");
         } catch (profileError) {

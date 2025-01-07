@@ -22,6 +22,8 @@ import {
 } from "../services/noticeService";
 import { useToast } from "../context/ToastContext";
 import Loader from "../components/Loader/Loader";
+import { selectUser } from "../store/slices/userSlice";
+import { useSelector } from "react-redux";
 
 const Notices = () => {
   const [notices, setNotices] = useState([]);
@@ -45,6 +47,7 @@ const Notices = () => {
   });
 
   const showToast = useToast();
+  const user = useSelector(selectUser);
 
   // Fetch notices on component mount
   useEffect(() => {
@@ -154,14 +157,18 @@ const Notices = () => {
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">
               School Notices/News
             </h1>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => handleClickOpen()}
-              className="transition-transform transform hover:scale-105"
-            >
-              Add New Notice
-            </Button>
+            {(user?.role === "admin" ||
+              user?.role === "superAdmin" ||
+              user?.role === "teacher") && (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => handleClickOpen()}
+                className="transition-transform transform hover:scale-105"
+              >
+                Add New Notice
+              </Button>
+            )}
           </div>
 
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
@@ -227,22 +234,26 @@ const Notices = () => {
                   </div>
 
                   <div className="flex justify-between items-center pt-4 mt-4 border-t border-gray-100">
-                    <div className="flex gap-2">
-                      <button
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
-                        onClick={() => handleClickOpen(notice)}
-                      >
-                        <PiPencilSimple className="text-lg" />
-                        Edit
-                      </button>
-                      <button
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 hover:border-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200"
-                        onClick={() => handleDeleteNotice(notice._id)}
-                      >
-                        <PiTrash className="text-lg" />
-                        Delete
-                      </button>
-                    </div>
+                    {(user?.role === "admin" ||
+                      user?.role === "superAdmin" ||
+                      user?.role === "teacher") && (
+                      <div className="flex gap-2">
+                        <button
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                          onClick={() => handleClickOpen(notice)}
+                        >
+                          <PiPencilSimple className="text-lg" />
+                          Edit
+                        </button>
+                        <button
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 hover:border-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200"
+                          onClick={() => handleDeleteNotice(notice._id)}
+                        >
+                          <PiTrash className="text-lg" />
+                          Delete
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />

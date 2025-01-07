@@ -4,6 +4,8 @@ import { getAllClasses } from "../services/classService";
 import teacherService from "../services/teacherService";
 import { useToast } from "../context/ToastContext";
 import Loader from "../components/Loader/Loader";
+import { selectUser } from "../store/slices/userSlice";
+import { useSelector } from "react-redux";
 const Class = () => {
   const [classes, setClasses] = useState([]);
   const [teachersMap, setTeachersMap] = useState({});
@@ -11,6 +13,7 @@ const Class = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const showToast = useToast();
+  const user = useSelector(selectUser);
 
   useEffect(() => {
     fetchClasses();
@@ -95,12 +98,14 @@ const Class = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Classes</h1>
-        <button
-          onClick={handleAddClass}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Add Class
-        </button>
+        {(user?.role === "admin" || user?.role === "superAdmin") && (
+          <button
+            onClick={handleAddClass}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Add Class
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
