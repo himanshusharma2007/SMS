@@ -26,6 +26,7 @@ const ClassList = () => {
       try {
         setIsLoading(true);
         const fetchedClasses = await getAllClasses();
+        console.log("fetchedClasses.data", fetchedClasses.data);
         setClasses(fetchedClasses.data);
         if (fetchedClasses.data.length === 0) {
           showToast("No classes found in the system", "info");
@@ -81,7 +82,7 @@ const ClassList = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Class Name</TableCell>
+              <TableCell>Class-Section</TableCell>
               <TableCell>Total Students</TableCell>
               <TableCell>View Details</TableCell>
             </TableRow>
@@ -89,7 +90,9 @@ const ClassList = () => {
           <TableBody>
             {classes.map((classItem, index) => (
               <TableRow key={index}>
-                <TableCell>{classItem.name}</TableCell>
+                <TableCell>
+                  {classItem.name} - {classItem.section}
+                </TableCell>
                 <TableCell>{classItem.students.length}</TableCell>
                 <TableCell>
                   <Link

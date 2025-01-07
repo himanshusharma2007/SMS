@@ -117,9 +117,11 @@ const StaffListPage = () => {
           </CustomButton>
           <h1 className="text-2xl font-bold">{department}</h1>
         </div>
-        <CustomButton onClick={() => navigate("/add-staff")}>
-          Add Staff
-        </CustomButton>
+        {department != "Teaching" && department != "Administration" && (
+          <CustomButton onClick={() => navigate("/add-staff")}>
+            Add Staff
+          </CustomButton>
+        )}
       </div>
 
       <SearchBar onSearch={setSearchTerm} />

@@ -4,6 +4,7 @@ const Connections = require("../models/connectionModels");
 exports.addConnection = async (req, res) => {
   try {
     const { name, email, profession, otherProfession, phoneNo } = req.body;
+    console.log('req.body', req.body)
     // Check for required fields
     if (!name || !email || !profession || !phoneNo) {
       return res.status(400).json({
