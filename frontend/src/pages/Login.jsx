@@ -1,7 +1,7 @@
 // components/Login.jsx
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import kids from "../assets/images/schoolcrm.jpg";
 import AuthService from "../services/authService";
 import ProfileService from "../services/profileService";
@@ -11,7 +11,6 @@ import { useToast } from "../context/ToastContext";
 function LoginPage() {
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("Admin");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.user);
@@ -47,29 +46,6 @@ function LoginPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleRoleChange = (newRole) => {
-    setRole(newRole);
-    showToast(`Switched to ${newRole} login`, "info");
-    // Set default login IDs based on role
-    switch (newRole) {
-      case "Admin":
-        setLoginId("A001");
-        break;
-      case "Teacher":
-        setLoginId("T001");
-        break;
-      case "Student":
-        setLoginId("S001");
-        break;
-      case "Parent":
-        setLoginId("P001");
-        break;
-      default:
-        setLoginId("");
-    }
-    setPassword("password123"); // Default password for demo
   };
 
   return (
@@ -149,26 +125,6 @@ function LoginPage() {
               {loading ? "Logging in..." : "Log in"}
             </button>
           </form>
-
-          {/* Login As Options */}
-          <div className="mt-8">
-            <p className="text-gray-500 mb-2 text-center">Login As</p>
-            <div className="flex flex-wrap justify-center gap-2">
-              {["Admin", "Teacher", "Parent", "Student"].map((roleOption) => (
-                <button
-                  key={roleOption}
-                  onClick={() => handleRoleChange(roleOption)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition duration-200 ${
-                    role === roleOption
-                      ? "bg-green-500 text-white shadow-md"
-                      : "border-green-500 text-green-500 hover:bg-green-500 hover:text-white"
-                  }`}
-                >
-                  {roleOption}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 
