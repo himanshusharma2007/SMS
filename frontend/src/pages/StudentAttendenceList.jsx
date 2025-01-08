@@ -27,6 +27,7 @@ const StudentAttendance = ({ setCurrentView }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [className, setClassName] = useState("");
+  const [classSection, setClassSection] = useState("");
 
   // Fetch students and attendance data
   useEffect(() => {
@@ -43,6 +44,7 @@ const StudentAttendance = ({ setCurrentView }) => {
         );
         console.log("studentsResponse", studentsResponse);
         setClassName(studentsResponse.data.class.name);
+        setClassSection(studentsResponse.data.class.section);
 
         // Fetch attendance data for the class
         const attendanceResponse =
