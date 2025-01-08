@@ -16,7 +16,7 @@ const checkTeacher = require("../middlewares/checkTeacher");
 router.post("/",jwtToken, checkTeacher, createTest);
 
 // Get all tests - accessible to authenticated users
-router.get("/",jwtToken, checkTeacher, getAllTests);
+router.get("/",jwtToken, getAllTests);
 
 // Get specific test by ID
 router.get("/:id",jwtToken, getTestById);

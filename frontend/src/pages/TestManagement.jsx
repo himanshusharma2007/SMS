@@ -97,7 +97,11 @@ const TestManagement = () => {
 
   const handleTestClick = (test) => {
     {
-      if (user?.role === "admin" || user?.role === "superAdmin") {
+      if (
+        user?.role === "admin" ||
+        user?.role === "superAdmin" ||
+        user?.role === "teacher"
+      ) {
         navigate(`/submission/all/${test._id}`);
       } else {
         navigate(`/assesments/${test._id}`);

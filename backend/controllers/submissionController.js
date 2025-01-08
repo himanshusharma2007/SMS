@@ -212,11 +212,11 @@ exports.getTestSubmissions = async (req, res) => {
         select: "text options questionType", // Select specific fields to include
       });
 
-    if (submissions.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No submissions found for this test" });
-    }
+    // if (submissions.length === 0) {
+    //   return res
+    //     .status(404)
+    //     .json({ error: "No submissions found for this test" });
+    // }
 
     return res.status(200).json({
       message: "All submissions for the test retrieved successfully",
