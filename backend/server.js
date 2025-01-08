@@ -31,7 +31,7 @@ require("dotenv").config();
 
 const URL = process.env.DB_URL;
 console.log("process.env.DB_URL", process.env.DB_URL);
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // app.use(express.static(path.join(__dirname, "../frontend/dist")));
 // Middleware
@@ -45,7 +45,7 @@ app.use(cookieParser());
 // );
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5174"],
     credentials: true,
   })
 );
