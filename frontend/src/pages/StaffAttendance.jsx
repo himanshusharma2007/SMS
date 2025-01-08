@@ -8,6 +8,7 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaHistory,
+  FaFilter,
 } from "react-icons/fa";
 import StaffService from "../services/staffServices";
 import StaffAttendanceService from "../services/staffAttendanceService";
@@ -19,9 +20,11 @@ const StaffAttendance = () => {
     new Date().toISOString().split("T")[0]
   );
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [staff, setStaff] = useState([]);
   const [attendanceData, setAttendanceData] = useState([]);
   const [filteredStaff, setFilteredStaff] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const showToast = useToast();
@@ -32,22 +35,30 @@ const StaffAttendance = () => {
       setIsLoading(true);
       setError(null);
       try {
-        // Fetch basic staff data
         const staffResponse = await StaffService.getAllStaff();
-        setStaff(staffResponse);
+        console.log("staffResponse", staffResponse.data);
+        setStaff(staffResponse.data);
+
+        // Extract unique departments from staff data
+        const uniqueDepartments = [
+          ...new Set(staffResponse.data.map((staff) => staff?.name)),
+        ].filter(Boolean);
+        setDepartments(uniqueDepartments);
 
         const attendanceResponse = await StaffAttendanceService.getAttendance(
           selectedDate
         );
-        console.log("attendanceResponse", attendanceResponse);
+
         if (!attendanceResponse.success) {
           throw new Error("Failed to fetch attendance");
         }
 
-        console.log("attendanceResponse", attendanceResponse);
-
-        setFilteredStaff(attendanceResponse.data);
         setAttendanceData(attendanceResponse.data);
+        filterStaffData(
+          attendanceResponse.data,
+          selectedDepartment,
+          searchTerm
+        );
       } catch (error) {
         console.error("Error fetching data:", error);
         setError(error.message);
@@ -59,19 +70,48 @@ const StaffAttendance = () => {
     fetchData();
   }, [selectedDate]);
 
+  // Filter staff data based on department and search term
+  const filterStaffData = (data, department, search) => {
+    let filtered = [...data];
+
+    // Filter by department
+    if (department !== "all") {
+      filtered = filtered.filter(
+        (member) =>
+          member.staffId.department?.name.toLowerCase() ===
+          department.toLowerCase()
+      );
+    }
+
+    // Filter by search term
+    if (search) {
+      filtered = filtered.filter(
+        (member) =>
+          member.staffId.name.toLowerCase().includes(search.toLowerCase()) ||
+          member.staffId.department?.name
+            .toLowerCase()
+            .includes(search.toLowerCase())
+      );
+    }
+
+    setFilteredStaff(filtered);
+  };
+
+  // Handle department filter change
+  useEffect(() => {
+    filterStaffData(attendanceData, selectedDepartment, searchTerm);
+  }, [selectedDepartment, searchTerm, attendanceData]);
+
   const updateAttendance = async (staffId, newStatus) => {
     try {
-      console.log("staffId", staffId);
       const time = new Date().toString();
-      console.log("time", time);
       const attendanceData = {
         staffId: staffId,
         date: selectedDate,
         status: newStatus,
-        entryTime: new Date().toString(),
+        entryTime: time,
       };
 
-      // Create new attendance record
       const response = await StaffAttendanceService.updateAttendance(
         attendanceData
       );
@@ -79,8 +119,7 @@ const StaffAttendance = () => {
       if (!response.success) {
         throw new Error(response.message || "Failed to update attendance");
       }
-      console.log("response.data", response.data);
-      // Update local attendance data
+
       setFilteredStaff((prev) =>
         prev.map((record) =>
           record.staffId._id === staffId
@@ -137,21 +176,13 @@ const StaffAttendance = () => {
   };
 
   const exportToCSV = () => {
-    const headers = [
-      "Date",
-      "Name",
-      "Department",
-      "Designation",
-      "Status",
-      "Entry Time",
-    ];
+    const headers = ["Date", "Name", "Department", "Entry Time", "Status"];
     const csvData = filteredStaff.map((member) => [
       selectedDate,
-      member.name,
-      member.department,
-      member.designation,
-      member.status,
+      member.staffId.name,
+      member.staffId.department?.name || "N/A",
       member.entryTime ? new Date(member.entryTime).toLocaleTimeString() : "-",
+      member.status,
     ]);
 
     csvData.unshift(headers);
@@ -168,7 +199,7 @@ const StaffAttendance = () => {
     showToast("Attendance report exported successfully", "success");
   };
 
-  // Calculate stats
+  // Calculate stats for filtered staff
   const stats = {
     total: filteredStaff.length,
     present: filteredStaff.filter((t) => t.status === "present").length,
@@ -248,6 +279,21 @@ const StaffAttendance = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
+            <div className="flex items-center">
+              <FaFilter className="w-4 h-4 mr-2 text-gray-500" />
+              <select
+                value={selectedDepartment}
+                onChange={(e) => setSelectedDepartment(e.target.value)}
+                className="border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              >
+                <option value="all">All Departments</option>
+                {departments.map((department) => (
+                  <option key={department} value={department}>
+                    {department}
+                  </option>
+                ))}
+              </select>
+            </div>
             <button
               onClick={exportToCSV}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -277,7 +323,6 @@ const StaffAttendance = () => {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Department
                       </th>
-
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Entry Time
                       </th>
@@ -291,7 +336,6 @@ const StaffAttendance = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredStaff.map((member) => {
-                      // Check if selected date is more than 1 day before the current date
                       const currentDate = new Date();
                       const selectedDateObj = new Date(selectedDate);
                       const isPastDate =
@@ -299,7 +343,6 @@ const StaffAttendance = () => {
                           (1000 * 60 * 60 * 24) >
                         1;
 
-                      // Adjust status if it's a past date and still "pending"
                       const adjustedStatus =
                         isPastDate && member.status === "pending"
                           ? "absent"
@@ -316,9 +359,8 @@ const StaffAttendance = () => {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-gray-500">
-                            {member.staffId.department.name}
+                            {member.staffId.department?.name || "N/A"}
                           </td>
-
                           <td className="px-6 py-4 whitespace-nowrap text-gray-500">
                             {adjustedStatus === "present"
                               ? member.entryTime
@@ -394,7 +436,10 @@ const StaffAttendance = () => {
 
             {/* Results Summary */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800">
-              Showing {filteredStaff.length} of {staff.length} staff members for{" "}
+              Showing {filteredStaff.length} of {staff.length} staff members
+              {selectedDepartment !== "all" &&
+                ` (filtered by ${selectedDepartment} department)`}{" "}
+              for{" "}
               {new Date(selectedDate).toLocaleDateString("en-US", {
                 weekday: "long",
                 year: "numeric",
@@ -433,19 +478,23 @@ const StaffAttendance = () => {
               No staff members found
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              {searchTerm
-                ? "Try adjusting your search terms"
+              {searchTerm || selectedDepartment !== "all"
+                ? "Try adjusting your search terms or filters"
                 : "No staff members are registered in the system"}
             </p>
           </div>
         )}
 
         {/* Search Results */}
-        {searchTerm && filteredStaff.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800">
-            Found {filteredStaff.length} staff members matching "{searchTerm}"
-          </div>
-        )}
+        {(searchTerm || selectedDepartment !== "all") &&
+          filteredStaff.length > 0 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800">
+              Found {filteredStaff.length} staff members
+              {searchTerm && ` matching "${searchTerm}"`}
+              {selectedDepartment !== "all" &&
+                ` in ${selectedDepartment} department`}
+            </div>
+          )}
       </div>
     </div>
   );

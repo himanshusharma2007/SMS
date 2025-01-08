@@ -184,12 +184,18 @@ const AddStaffForm = () => {
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Select Department</option>
-                {departments.map((dept) => (
-                  <option key={dept._id} value={dept._id}>
-                    {dept.name}
-                  </option>
-                ))}
+                {departments
+                  .filter(
+                    (dept) =>
+                      dept.name !== "Teaching" && dept.name !== "Administration"
+                  )
+                  .map((dept) => (
+                    <option key={dept._id} value={dept._id}>
+                      {dept.name}
+                    </option>
+                  ))}
               </select>
+
               {errors.department && (
                 <p className="text-sm text-red-600">{errors.department}</p>
               )}

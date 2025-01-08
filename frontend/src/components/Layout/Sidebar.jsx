@@ -24,8 +24,99 @@ import { GiTeacher } from "react-icons/gi";
 import { SiGoogleclassroom } from "react-icons/si";
 import AuthService from "../../services/authService";
 import { useToast } from "../../context/ToastContext";
+import { useSelector } from "react-redux";
+import { selectUser } from "../../store/slices/userSlice";
+
+// Menu configuration based on roles
+const menuConfig = {
+  admin: {
+    main: ["dashboard", "students", "teachers", "staff", "class"],
+    academic: ["time-table", "student-marks", "result"],
+    attendance: ["attendance", "staff-attendance"],
+    communication: ["parents", "notices", "connections"],
+    finance: ["fee-reminder"],
+    transport: ["transport"],
+  },
+  superAdmin: {
+    main: ["dashboard", "students", "teachers", "staff", "class"],
+    academic: ["time-table", "student-marks", "result"],
+    attendance: ["attendance", "staff-attendance"],
+    communication: ["notices", "connections"],
+    finance: ["fee-reminder"],
+    transport: ["transport"],
+  },
+  teacher: {
+    main: ["dashboard", "students", "class"],
+    academic: ["time-table", "assesments", "student-marks", "result"],
+    attendance: ["attendance"],
+    communication: ["parents", "notices", "live-sessions", "connections"],
+  },
+  student: {
+    main: ["dashboard"],
+    academic: ["time-table", "assesments", "result"],
+    communication: ["notices", "live-sessions"],
+  },
+};
+
+// Menu items configuration with their respective icons and labels
+const menuItems = {
+  dashboard: { icon: MdDashboard, label: "Dashboard", path: "/dashboard" },
+  students: { icon: FaUserGraduate, label: "Students", path: "/students" },
+  teachers: { icon: GiTeacher, label: "Teachers", path: "/teachers" },
+  staff: { icon: FaChalkboardTeacher, label: "Staff", path: "/staff" },
+  class: { icon: SiGoogleclassroom, label: "Class", path: "/class" },
+  "time-table": {
+    icon: TbCalendarTime,
+    label: "Time Table",
+    path: "/time-table",
+  },
+  assesments: {
+    icon: FaClipboardCheck,
+    label: "Assessments",
+    path: "/assesments",
+  },
+  "student-marks": {
+    icon: FaBook,
+    label: "Student Marks",
+    path: "/student-marks",
+  },
+  result: { icon: FaGraduationCap, label: "Results", path: "/result" },
+  attendance: {
+    icon: FaCalendarAlt,
+    label: "Student Attendance",
+    path: "/attendance",
+  },
+  "staff-attendance": {
+    icon: FaCalendarAlt,
+    label: "Staff Attendance",
+    path: "/staff-attendance",
+  },
+  parents: { icon: RiParentFill, label: "Parents", path: "/parents" },
+  notices: { icon: FaBell, label: "Notices", path: "/notices" },
+  "live-sessions": {
+    icon: FaVideo,
+    label: "Live Sessions",
+    path: "/live-sessions",
+  },
+  connections: {
+    icon: FaNetworkWired,
+    label: "Connections",
+    path: "/connections",
+  },
+  "fee-reminder": {
+    icon: MdPayment,
+    label: "Fee Reminder",
+    path: "/fee-reminder",
+  },
+  transport: {
+    icon: FaBus,
+    label: "School Transportation",
+    path: "/transport",
+  },
+};
 
 const Sidebar = () => {
+  const user = useSelector(selectUser);
   const [isOpen, setIsOpen] = useState(true);
   const [expandedGroups, setExpandedGroups] = useState([]);
   const location = useLocation();
@@ -47,11 +138,9 @@ const Sidebar = () => {
     return response;
   };
 
-  const MenuGroup = ({ title, children }) => {
+  const MenuGroup = ({ title, items }) => {
     const isExpanded = expandedGroups.includes(title);
-    const groupRoutes = React.Children.toArray(children).map(
-      (child) => child.props.to
-    );
+    const groupRoutes = items.map((item) => menuItems[item].path);
     const isActive = isGroupActive(groupRoutes);
 
     const handleToggle = () => {
@@ -61,6 +150,9 @@ const Sidebar = () => {
           : [...prevExpanded, title]
       );
     };
+
+    // Don't render the group if there are no items
+    if (items.length === 0) return null;
 
     return (
       <div className="mb-2">
@@ -105,11 +197,6 @@ const Sidebar = () => {
                 ? "max-h-[400px] opacity-100 translate-y-0 scale-100"
                 : "max-h-0 opacity-0 -translate-y-2 scale-95"
             }`}
-          style={{
-            transformOrigin: "top",
-            transitionProperty: "max-height, opacity, transform",
-            transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)",
-          }}
         >
           <ul
             className={`mt-1 space-y-1 px-2 transition-all duration-300 transform-gpu
@@ -118,12 +205,15 @@ const Sidebar = () => {
                 ? "translate-y-0 opacity-100"
                 : "-translate-y-4 opacity-0"
             }`}
-            style={{
-              transitionDelay: isExpanded ? "150ms" : "0ms",
-              transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)",
-            }}
           >
-            {children}
+            {items.map((item) => (
+              <MenuItem
+                key={item}
+                to={menuItems[item].path}
+                icon={menuItems[item].icon}
+                label={menuItems[item].label}
+              />
+            ))}
           </ul>
         </div>
       </div>
@@ -165,9 +255,11 @@ const Sidebar = () => {
     </li>
   );
 
+  // Get the menu configuration for the current user role
+  const roleMenus = menuConfig[user?.role] || menuConfig.student; // Default to student if role not found
+
   return (
     <div className="relative w-full">
-      {/* Mobile Overlay */}
       {!isOpen && (
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-20 lg:hidden 
@@ -176,13 +268,11 @@ const Sidebar = () => {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0 h-screen bg-gray-900 transition-all duration-300 ease-in-out 
           ${isOpen ? "w-[20vw]" : "w-20"} z-30 border-r border-gray-800/50 
           flex flex-col overflow-hidden shadow-xl shadow-black/20`}
       >
-        {/* Header */}
         <div
           className="h-16 flex items-center justify-between px-4 border-b border-gray-800/50 
           flex-shrink-0 bg-gradient-to-b from-gray-900 to-gray-900/95"
@@ -203,83 +293,32 @@ const Sidebar = () => {
           </div>
         </div>
 
-        {/* Navigation with dropdowns */}
         <nav className="flex-1 overflow-y-auto py-4 px-2">
           <div className="space-y-2">
-            <MenuGroup title="Main">
-              <MenuItem to="/dashboard" icon={MdDashboard} label="Dashboard" />
-              <MenuItem to="/students" icon={FaUserGraduate} label="Students" />
-              <MenuItem to="/teachers" icon={GiTeacher} label="Teachers" />
-              <MenuItem to="/staff" icon={FaChalkboardTeacher} label="Staff" />
-              <MenuItem to="/class" icon={SiGoogleclassroom} label="Class" />
-            </MenuGroup>
-
-            <MenuGroup title="Academic">
-              <MenuItem
-                to="/time-table"
-                icon={TbCalendarTime}
-                label="Time Table"
+            {roleMenus.main && (
+              <MenuGroup title="Main" items={roleMenus.main} />
+            )}
+            {roleMenus.academic && (
+              <MenuGroup title="Academic" items={roleMenus.academic} />
+            )}
+            {roleMenus.attendance && (
+              <MenuGroup title="Attendance" items={roleMenus.attendance} />
+            )}
+            {roleMenus.communication && (
+              <MenuGroup
+                title="Communication"
+                items={roleMenus.communication}
               />
-              <MenuItem
-                to="/assesments"
-                icon={FaClipboardCheck}
-                label="Assessments"
-              />
-              <MenuItem
-                to="/student-marks"
-                icon={FaBook}
-                label="Student Marks"
-              />
-              <MenuItem to="/result" icon={FaGraduationCap} label="Results" />
-            </MenuGroup>
-
-            <MenuGroup title="Attendance">
-              <MenuItem
-                to="/attendance"
-                icon={FaCalendarAlt}
-                label="Student Teacher Attendance"
-              />
-              <MenuItem
-                to="/staff-attendance"
-                icon={FaCalendarAlt}
-                label="Staff Attendance"
-              />
-            </MenuGroup>
-
-            <MenuGroup title="Communication">
-              <MenuItem to="/parents" icon={RiParentFill} label="Parents" />
-              <MenuItem to="/notices" icon={FaBell} label="Notices" />
-              <MenuItem
-                to="/live-sessions"
-                icon={FaVideo}
-                label="Live Sessions"
-              />
-              <MenuItem
-                to="/connections"
-                icon={FaNetworkWired}
-                label="Connections"
-              />
-            </MenuGroup>
-
-            <MenuGroup title="Finance">
-              <MenuItem
-                to="/fee-reminder"
-                icon={MdPayment}
-                label="Fee Reminder"
-              />
-            </MenuGroup>
-
-            <MenuGroup title="Transport">
-              <MenuItem
-                to="/transport"
-                icon={FaBus}
-                label="School Transportation"
-              />
-            </MenuGroup>
+            )}
+            {roleMenus.finance && (
+              <MenuGroup title="Finance" items={roleMenus.finance} />
+            )}
+            {roleMenus.transport && (
+              <MenuGroup title="Transport" items={roleMenus.transport} />
+            )}
           </div>
         </nav>
 
-        {/* Profile Section */}
         <div
           className="border-t border-gray-800/50 bg-gradient-to-b from-gray-900/95 to-gray-900 
           backdrop-blur flex-shrink-0 shadow-lg"
@@ -300,7 +339,7 @@ const Sidebar = () => {
               {isOpen && (
                 <div className="flex-1 min-w-0 transition-all duration-300">
                   <p className="text-sm font-medium text-white truncate group-hover:text-blue-400">
-                    Admin User
+                    {user?.name || "User"}
                   </p>
                   <p className="text-xs text-gray-400 truncate group-hover:text-gray-300">
                     View Profile
@@ -332,7 +371,6 @@ const Sidebar = () => {
         </div>
       </aside>
 
-      {/* Toggle Button - Mobile Only */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed top-4 left-4 z-40 p-2.5 rounded-xl bg-gray-900 text-white lg:hidden 

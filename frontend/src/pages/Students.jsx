@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import StudentService from "../services/studentServices";
 import * as ClassService from "../services/classService";
 import { useToast } from "../context/ToastContext";
+import { selectUser } from "../store/slices/userSlice";
+import { useSelector } from "react-redux";
 
 const Student = () => {
   const navigate = useNavigate();
@@ -11,6 +13,7 @@ const Student = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const user = useSelector(selectUser);
 
   // Filters and pagination
   const [selectedClass, setSelectedClass] = useState("all");
@@ -30,7 +33,7 @@ const Student = () => {
           StudentService.getAllStudents(),
           ClassService.getAllClasses(),
         ]);
-        console.log('studentsResponse.data', studentsResponse.data)
+        console.log("studentsResponse.data", studentsResponse.data);
         setStudents(studentsResponse.data);
         setClasses(classesResponse.data);
         console.log(studentsResponse.data)
@@ -99,12 +102,14 @@ const Student = () => {
 
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Students</h1>
-        <button
-          onClick={() => navigate("/addmission-form")}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2"
-        >
-          <span className="text-xl">+</span> Add new student
-        </button>
+        {(user?.role === "admin" || user?.role === "superAdmin") && (
+          <button
+            onClick={() => navigate("/addmission-form")}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2"
+          >
+            <span className="text-xl">+</span> Add new student
+          </button>
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -151,9 +156,11 @@ const Student = () => {
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
                     Batch
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
-                    Actions
-                  </th>
+                  {(user?.role === "admin" || user?.role === "superAdmin") && (
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">
+                      Actions
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -166,27 +173,29 @@ const Student = () => {
                         "N/A"}
                     </td>
                     <td className="px-6 py-4">{student.batch}</td>
-                    <td className="px-6 py-4 relative">
-                      <div className="flex">
-                        <button
-                          onClick={() =>
-                            navigate(`/edit-student/${student._id}`)
-                          }
-                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-600"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => {
-                            setStudentToDelete(student);
-                          }}
-                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                      {/* )} */}
-                    </td>
+                    {(user?.role === "admin" ||
+                      user?.role === "superAdmin") && (
+                      <td className="px-6 py-4 relative">
+                        <div className="flex">
+                          <button
+                            onClick={() =>
+                              navigate(`/edit-student/${student._id}`)
+                            }
+                            className="w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-600"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => {
+                              setStudentToDelete(student);
+                            }}
+                            className="w-full px-4 py-2 text-left hover:bg-gray-50 text-red-600"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

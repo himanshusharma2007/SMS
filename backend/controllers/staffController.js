@@ -9,20 +9,20 @@ const Connections = require("../models/connectionModels");
 // Add a new staff member
 exports.addStaff = async (req, res) => {
   console.log("Received request to add staff:", req.body);
-  const departmentId=req.body.department;
+  const departmentId = req.body.department;
   const department = await Department.findById(departmentId);
-  if(!department){
+  if (!department) {
     console.log("Error: Department not found");
     return res.status(400).json({ error: "Department not found" });
   }
-  const departmentName=department.name
+  const departmentName = department.name;
   try {
     const {
       name,
       phoneNo,
       joinDate,
       email,
-      role="admin",
+      role = "admin",
       position,
       salary,
       govId,
@@ -77,7 +77,7 @@ exports.addStaff = async (req, res) => {
       department: department._id,
       position,
       teacherOrAdmin:
-        departmentName === "Administration" ? "SuperAdmin" : "Staff",
+        department.name === "Administration" ? "SuperAdmin" : department.name === "Teaching"? "Teacher": null,
       salary,
       address,
       govId,
@@ -128,7 +128,8 @@ exports.addStaff = async (req, res) => {
     await Connections.create({
       name: staff.name,
       email: staff.email,
-      profession: departmentName === "Administration" ? "admin" : "staff",
+      profession: department.name === "Teaching"? "teacher": "other",
+      otherProfession: "other",
       phoneNo: staff.phoneNo,
     });
 
