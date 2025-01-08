@@ -7,6 +7,6 @@ const checkTeacher = require("../middlewares/checkTeacher");
 
 // Route to add a new notice
 router.get("/", jwtToken, checkTeacher, getAllClass);
-router.get("/:id", jwtToken, checkTeacher, getAllClassById);
+router.get("/:id", jwtToken, getAllClassById);
 
 module.exports = router;

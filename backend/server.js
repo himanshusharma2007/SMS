@@ -25,6 +25,9 @@ const testRouter = require("./routes/testRouter");
 const submissionRouter = require("./routes/submissionRouter");
 const dashboardRoutes = require("./routes/adminDashboardRoutes");
 const driverRoutes = require("./routes/driverRoutes");
+const vehicleRoutes = require("./routes/vehicleRoutes");
+const routeRoutes = require("./routes/routeRoutes");
+const vehicleHistoryRoutes = require("./routes/vehicleHistoryRoutes");
 
 const path = require("path");
 
@@ -71,6 +74,10 @@ app.use("/api/live-sessions", liveSessionRouter);
 app.use("/api/tests", testRouter);
 app.use("/api/submission", submissionRouter);
 app.use("/api/driver", driverRoutes);
+app.use("/api/vehicle", vehicleRoutes);
+app.use("/api/vehicle-route", routeRoutes);
+app.use("/api/vehicle-history", vehicleHistoryRoutes);
+
 // app.get("*", (req, res) => {
 //   res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 // });
