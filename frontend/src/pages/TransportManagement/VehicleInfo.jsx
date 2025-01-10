@@ -110,7 +110,7 @@ const VehicleDetails = () => {
             </div>
           )}
         </div>
-        <div className="vehicle-info">
+        <div className="vehicle-info-section">
           <h1>
             <strong>{vehicle.model}</strong>
           </h1>

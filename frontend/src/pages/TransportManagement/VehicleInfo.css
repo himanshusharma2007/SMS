@@ -1,12 +1,12 @@
 #showDetial{
     cursor: pointer;
   }
-  .vechileInfoBoth{
+  .vehicle-info-container{
     display: flex;
     width: 100%;
     gap: 50px;
   }
-  .tab-vehicle-photo-section{
+  .vehicle-photo-section{
     width: 50%;
     max-height: 400px;
   }
@@ -16,4 +16,8 @@
   }
   .vehicle-info-section{
     width: 50%;
+  }
+  .vehicle-actions{
+    display: flex;
+    gap: 150px;
   }

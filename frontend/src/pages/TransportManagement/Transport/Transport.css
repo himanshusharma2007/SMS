@@ -1,0 +1,6 @@
+.locationpannel{
+    width: 100%;
+    height: 72%;
+    display: flex;
+    justify-content: space-between;
+  }
