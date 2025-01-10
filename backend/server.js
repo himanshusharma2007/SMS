@@ -29,6 +29,7 @@ const vehicleRoutes = require("./routes/vehicleRoutes");
 const routeRoutes = require("./routes/routeRoutes");
 const vehicleHistoryRoutes = require("./routes/vehicleHistoryRoutes");
 const teacherDashboardRoutes = require("./routes/teacherDashboardRoutes")
+const studentDashboardRoutes = require("./routes/studentDashboardRoutes")
 
 const path = require("path");
 
@@ -60,6 +61,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/teacher-dashboard", teacherDashboardRoutes)
+app.use("/api/student-dashboard", studentDashboardRoutes)
 app.use("/api/student-marks", studentMarksRouter);
 app.use("/api/student-attendance", studentAttendanceRouter);
 app.use("/api/teacher-attendance", teacherAttendanceRouter);
