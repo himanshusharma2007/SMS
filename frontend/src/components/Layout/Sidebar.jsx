@@ -117,7 +117,7 @@ const menuItems = {
 const Sidebar = () => {
   const user = useSelector(selectUser);
   const [isOpen, setIsOpen] = useState(true);
-  const [expandedGroups, setExpandedGroups] = useState([]);
+  const [expandedGroups, setExpandedGroups] = useState(["Main"]); // Default to the first group
   const location = useLocation();
   const showToast = useToast();
   const navigate = useNavigate();
@@ -378,7 +378,7 @@ const Sidebar = () => {
       >
         <FaBars className="w-6 h-6" />
       </button>
-    </div>
+    </div> 
   );
 };
 

@@ -123,7 +123,7 @@ const Student = () => {
               <option value="all">All Classes</option>
               {classes.map((cls) => (
                 <option key={cls._id} value={cls._id}>
-                  {cls.name}
+                  {cls.name}-{cls.section}
                 </option>
               ))}
             </select>
@@ -169,8 +169,13 @@ const Student = () => {
                     <td className="px-6 py-4">{student.registrationNumber}</td>
                     <td className="px-6 py-4">{student.name}</td>
                     <td className="px-6 py-4">
-                      {classes.find((c) => c._id === student.class)?.name ||
-                        "N/A"}
+                      {classes.find((c) => c._id === student.class)
+                        ? `${
+                            classes.find((c) => c._id === student.class).name
+                          } - ${
+                            classes.find((c) => c._id === student.class).section
+                          }`
+                        : "N/A"}
                     </td>
                     <td className="px-6 py-4">{student.batch}</td>
                     {(user?.role === "admin" ||
