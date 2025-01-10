@@ -98,6 +98,7 @@ const VehicleDetails = () => {
               src={vehicle.img}
               alt={`${vehicle.model}`}
               className="vehicle-photo"
+              height={300}
             />
           ) : (
             <div className="vehicle-initials">
