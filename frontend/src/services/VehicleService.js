@@ -2,11 +2,10 @@
 import api from "./api";
 
 export class VehicleService {
-  static BASE_URL = "/api/vehicles";
 
   static async addVehicle(vehicleData) {
     try {
-      const response = await api.post("/vehicles", vehicleData);
+      const response = await api.post("/vehicle", vehicleData);
       return response.data;
     } catch (error) {
       this.handleError(error);
@@ -15,7 +14,7 @@ export class VehicleService {
 
   static async updateVehicle(id, updateData) {
     try {
-      const response = await api.put(`/vehicles/${id}`, updateData);
+      const response = await api.put(`/vehicle/${id}`, updateData);
       return response.data;
     } catch (error) {
       this.handleError(error);
@@ -24,7 +23,7 @@ export class VehicleService {
 
   static async getVehicle(id) {
     try {
-      const response = await api.get(`/vehicles/${id}`);
+      const response = await api.get(`/vehicle/${id}`);
       return response.data;
     } catch (error) {
       this.handleError(error);
@@ -33,7 +32,7 @@ export class VehicleService {
 
   static async getAllVehicles() {
     try {
-      const response = await api.get("/vehicles");
+      const response = await api.get("/vehicle");
       return response.data;
     } catch (error) {
       this.handleError(error);
@@ -42,7 +41,7 @@ export class VehicleService {
 
   static async deleteVehicle(id) {
     try {
-      const response = await api.delete(`/vehicles/${id}`);
+      const response = await api.delete(`/vehicle/${id}`);
       return response.data;
     } catch (error) {
       this.handleError(error);

@@ -1,32 +1,66 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import VehicleForm from "./VehicleForm";
-import data from "./InitialData.json";
+import { VehicleService } from "../../services/VehicleService";
+import { toast } from "react-toastify"; // Assuming you're using react-toastify for notifications
 
 const VehicleTab = () => {
-  const [vehicles, setVehicles] = useState(data.vehicles);
-  const availableDrivers = data.drivers;
-  const availableRoutes = data.routes;
+  const [vehicles, setVehicles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [currentVehicle, setCurrentVehicle] = useState(null);
+
+  useEffect(() => {
+    loadVehicles();
+  }, []);
+
+  const loadVehicles = async () => {
+    try {
+      setLoading(true);
+      const data = await VehicleService.getAllVehicles();
+      console.log("Vehicles:", data.data);
+      setVehicles(data.data);
+    } catch (err) {
+      setError(err.message);
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAdd = () => {
     setCurrentVehicle(null);
     setShowForm(true);
   };
 
-  const handleSave = (vehicle) => {
-    if (currentVehicle) {
-      setVehicles(
-        vehicles.map((v) =>
-          v.id === currentVehicle.id ? { ...vehicle, id: currentVehicle.id } : v
-        )
-      );
-    } else {
-      setVehicles([...vehicles, { ...vehicle, id: `V${vehicles.length + 1}` }]);
+  const handleSave = async (vehicleData) => {
+    try {
+      if (currentVehicle) {
+        await VehicleService.updateVehicle(currentVehicle.id, vehicleData);
+        toast.success("Vehicle updated successfully");
+      } else {
+        await VehicleService.addVehicle(vehicleData);
+        toast.success("Vehicle added successfully");
+      }
+      setShowForm(false);
+      loadVehicles(); // Reload the list
+    } catch (err) {
+      toast.error(err.message);
     }
-    setShowForm(false);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this vehicle?")) {
+      try {
+        await VehicleService.deleteVehicle(id);
+        toast.success("Vehicle deleted successfully");
+        loadVehicles();
+      } catch (err) {
+        toast.error(err.message);
+      }
+    }
   };
 
   const filteredVehicles = vehicles.filter(
@@ -37,14 +71,14 @@ const VehicleTab = () => {
 
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'maintenance':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'inactive':
-        return 'bg-red-100 text-red-800';
+      case "active":
+        return "bg-green-100 text-green-800";
+      case "maintenance":
+        return "bg-yellow-100 text-yellow-800";
+      case "inactive":
+        return "bg-red-100 text-red-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -60,9 +94,7 @@ const VehicleTab = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
           />
-          <span className="absolute right-3 top-2.5 text-gray-400">
-            🔍
-          </span>
+          <span className="absolute right-3 top-2.5 text-gray-400">🔍</span>
         </div>
         <button
           onClick={handleAdd}
@@ -108,7 +140,11 @@ const VehicleTab = () => {
                     Reg: {vehicle.registration}
                   </p>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(vehicle.status)}`}>
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
+                    vehicle.status
+                  )}`}
+                >
                   {vehicle.status}
                 </span>
               </div>
@@ -116,7 +152,9 @@ const VehicleTab = () => {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Capacity</span>
-                  <span className="text-gray-900">{vehicle.capacity} seats</span>
+                  <span className="text-gray-900">
+                    {vehicle.capacity} seats
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Fuel Type</span>
@@ -129,7 +167,7 @@ const VehicleTab = () => {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Driver</span>
                   <span className="text-gray-900 font-medium">
-                    {vehicle.driverAssigned || 'Unassigned'}
+                    {vehicle.driverAssigned || "Unassigned"}
                   </span>
                 </div>
               </div>
@@ -149,8 +187,8 @@ const VehicleTab = () => {
           vehicle={currentVehicle}
           onClose={() => setShowForm(false)}
           onSave={handleSave}
-          availableDrivers={availableDrivers}
-          availableRoutes={availableRoutes}
+          // availableDrivers={availableDrivers}
+          // availableRoutes={availableRoutes}
         />
       )}
     </div>

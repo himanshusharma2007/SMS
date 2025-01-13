@@ -1,12 +1,14 @@
-const Vehicle = require("../models/vehicleModels")
+const Vehicle = require("../models/vehicleModels");
+const uploadOnCloudinary = require("../utils/cloudinary");
 
+// Add new vehicle
 // Add new vehicle
 exports.addVehicle = async (req, res) => {
     try {
         const { registrationNumber, driver, type } = req.body;
 
         if (!registrationNumber || !type) {
-            return res.status(400).json({ error: "registrationNumber or type are required" })
+            return res.status(400).json({ error: "registrationNumber or type are required" });
         }
 
         // Check if vehicle with registration number already exists
@@ -17,12 +19,26 @@ exports.addVehicle = async (req, res) => {
             });
         }
 
+        let imageResponse;
+        if (req.file) { // Assuming `req.file` contains the uploaded file
+            imageResponse = await uploadOnCloudinary(req.file.path);
+            if (!imageResponse) {
+                return res.status(500).json({
+                    error: 'Error uploading image to Cloudinary'
+                });
+            }
+        }
+
         // Create new vehicle
         const vehicle = new Vehicle({
             registrationNumber,
             driver,
             type,
-            status: "Active" // Set default status as Active
+            status: "Active", // Set default status as Active
+            img: imageResponse ? {
+                public_id: imageResponse.public_id,
+                url: imageResponse.url
+            } : undefined
         });
 
         await vehicle.save();
@@ -36,6 +52,7 @@ exports.addVehicle = async (req, res) => {
         });
 
     } catch (error) {
+        console.error(error);
         res.status(500).json({
             error: 'Error adding vehicle'
         });
@@ -62,6 +79,19 @@ exports.updateVehicle = async (req, res) => {
             }
         }
 
+        if (req.file) { // Assuming `req.file` contains the uploaded file
+            const imageResponse = await uploadOnCloudinary(req.file.path);
+            if (!imageResponse) {
+                return res.status(500).json({
+                    error: 'Error uploading image to Cloudinary'
+                });
+            }
+            updateData.img = {
+                public_id: imageResponse.public_id,
+                url: imageResponse.url
+            };
+        }
+
         // Update vehicle
         const vehicle = await Vehicle.findByIdAndUpdate(
             id,
@@ -82,11 +112,13 @@ exports.updateVehicle = async (req, res) => {
         });
 
     } catch (error) {
+        console.error(error);
         res.status(500).json({
             error: 'Error updating vehicle'
         });
     }
 }
+
 
 // Get single vehicle
 exports.getVehicle = async (req, res) => {

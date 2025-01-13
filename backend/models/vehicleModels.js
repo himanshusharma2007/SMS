@@ -24,6 +24,10 @@ const vehicleSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: ["Active", "Inactive"]
+    },
+    img: {
+        public_id: {type: String, required: true},
+        url: {type: String, required: true},
     }
 }, {timestamps: true});
 

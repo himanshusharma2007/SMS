@@ -1,12 +1,18 @@
-const express = require('express');
-const { addDriver, updateDriver, getDriver, getAllDrivers } = require('../controllers/driverController');
-const jwtToken = require('../middlewares/jwtToken');
+const express = require("express");
+const {
+  addDriver,
+  updateDriver,
+  getDriver,
+  getAllDrivers,
+} = require("../controllers/driverController");
+const jwtToken = require("../middlewares/jwtToken");
 const router = express.Router();
-const checkAdmin = require("../middlewares/checkAdmin")
+const checkAdmin = require("../middlewares/checkAdmin");
+const upload = require("../middlewares/multer");
 
-router.post('/',jwtToken,checkAdmin, addDriver);
-router.put('/:id',jwtToken,checkAdmin, updateDriver);
-router.get('/:id',jwtToken, getDriver);
-router.get('/',jwtToken, getAllDrivers);
+router.post("/", upload.single("img"), jwtToken, checkAdmin, addDriver);
+router.put("/:id", upload.single("img"), jwtToken, checkAdmin, updateDriver);
+router.get("/:id", jwtToken, getDriver);
+router.get("/", jwtToken, getAllDrivers);
 
 module.exports = router;
