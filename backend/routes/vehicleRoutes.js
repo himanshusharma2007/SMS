@@ -11,8 +11,8 @@ const {
 const checkAdmin = require("../middlewares/checkAdmin");
 const upload = require("../middlewares/multer");
 
-router.post("/", upload.single("img"), jwtToken, checkAdmin, addVehicle);
-router.put("/:id", upload.single("img"), jwtToken, checkAdmin, updateVehicle);
+router.post("/", upload.single("image"), jwtToken, checkAdmin, addVehicle);
+router.put("/:id", upload.single("image"), jwtToken, checkAdmin, updateVehicle);
 router.get("/:id", jwtToken, getVehicle);
 router.get("/", jwtToken, getAllVehicles);
 router.delete("/:id", jwtToken, checkAdmin, deleteVehicle);

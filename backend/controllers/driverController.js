@@ -130,9 +130,9 @@ exports.addDriver = async (req, res) => {
           password: hashedPassword,
           img: imageResponse
             ? {
-                public_id: imageResponse.public_id,
-                url: imageResponse.url,
-              }
+              public_id: imageResponse.public_id,
+              url: imageResponse.url,
+            }
             : undefined
         }
       ],
@@ -162,24 +162,142 @@ exports.addDriver = async (req, res) => {
 
 // Update driver details
 exports.updateDriver = async (req, res) => {
-  try {
-    console.log("req.body", req.body);
-    const { id } = req.params;
-    const updates = req.body;
+  console.log("req.body in update driver", req.body);
+  const session = await mongoose.startSession();
 
-    const updatedDriver = await Driver.findByIdAndUpdate(id, updates, {
-      new: true,
-      runValidators: true,
-    });
-    if (!updatedDriver) {
-      return res.status(404).json({ message: "Driver not found." });
+  try {
+    const driverId = req.params.id; // Assuming the driver ID is passed in the URL
+    const {
+      licenseNumber,
+      experience,
+      dateOfBirth,
+      licenseExpiryDate,
+      name,
+      email,
+      phoneNo,
+      salary,
+      address,
+      govId,
+    } = req.body;
+
+    // Validate required fields
+    if (
+      !licenseNumber ||
+      !experience ||
+      !dateOfBirth ||
+      !licenseExpiryDate ||
+      !name ||
+      !email ||
+      !phoneNo ||
+      !salary ||
+      !address ||
+      !govId
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Please fill all required fields." });
     }
 
-    res
-      .status(200)
-      .json({ message: "Driver updated successfully.", data: updatedDriver });
+    // Find existing driver
+    const existingDriver = await Driver.findById(driverId);
+    if (!existingDriver) {
+      return res.status(404).json({ error: "Driver not found." });
+    }
+
+    // Check for duplicate entries excluding current driver/staff
+    const duplicateCheck = await Promise.all([
+      Driver.findOne({
+        licenseNumber,
+        _id: { $ne: driverId }
+      }),
+      Staff.findOne({
+        $or: [{ email }, { phoneNo }, { govId }],
+        _id: { $ne: existingDriver.staffId }
+      })
+    ]);
+
+    if (duplicateCheck[0] || duplicateCheck[1]) {
+      return res.status(400).json({ error: "Staff details already exist." });
+    }
+
+    // Start the transaction
+    session.startTransaction();
+
+    // Handle image upload if new image is provided
+    let imageUpdate = {};
+    if (req.file) {
+      const imageResponse = await uploadOnCloudinary(req.file.path);
+      if (!imageResponse) {
+        return res.status(500).json({
+          error: "Error uploading image to Cloudinary",
+        });
+      }
+
+      // Delete old image from Cloudinary if it exists
+      if (existingDriver.img?.public_id) {
+        await cloudinary.uploader.destroy(existingDriver.img.public_id)
+        console.log("Delete Image")
+      }
+
+      imageUpdate = {
+        img: {
+          public_id: imageResponse.public_id,
+          url: imageResponse.url,
+        }
+      };
+    }
+
+    // Update staff record
+    const updatedStaff = await Staff.findByIdAndUpdate(
+      existingDriver.staffId,
+      {
+        name,
+        email,
+        phoneNo,
+        salary,
+        address,
+        govId,
+      },
+      { new: true, session }
+    );
+
+    if (!updatedStaff) {
+      throw new Error("Failed to update staff record");
+    }
+
+    // Update driver record
+    const updatedDriver = await Driver.findByIdAndUpdate(
+      driverId,
+      {
+        licenseNumber,
+        experience,
+        dateOfBirth,
+        licenseExpiryDate,
+        ...imageUpdate
+      },
+      { new: true, session }
+    );
+
+    if (!updatedDriver) {
+      throw new Error("Failed to update driver record");
+    }
+
+    // Commit the transaction
+    await session.commitTransaction();
+    session.endSession();
+
+    return res.status(200).json({
+      message: "Driver updated successfully.",
+      data: updatedDriver
+    });
+
   } catch (error) {
-    res
+    // Abort the transaction on error
+    console.log("500", error);
+    await session.abortTransaction();
+    session.endSession();
+
+    return res
       .status(500)
       .json({ message: "Failed to update driver.", error: error.message });
   }

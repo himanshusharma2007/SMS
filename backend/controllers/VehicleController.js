@@ -1,60 +1,158 @@
 const Vehicle = require("../models/vehicleModels");
 const uploadOnCloudinary = require("../utils/cloudinary");
+const { isValidObjectId } = require('mongoose');
 
-// Add new vehicle
+const validateVehicleData = (data) => {
+    const errors = [];
+    
+    if (!data.model) errors.push('Model is required');
+    if (!data.registration) errors.push('Registration number is required');
+    if (!data.ownership) errors.push('Ownership status is required');
+    if (!data.chassisNumber) errors.push('Chassis number is required');
+    if (!data.engineNumber) errors.push('Engine number is required');
+    
+    // Validate dates
+    const currentDate = new Date();
+    
+    if (data.yearOfManufacture) {
+        const year = parseInt(data.yearOfManufacture);
+        if (isNaN(year) || year < 1900 || year > currentDate.getFullYear()) {
+            errors.push('Invalid year of manufacture');
+        }
+    }
+
+    if (data.pollutionValidUntil) {
+        const pollutionDate = new Date(data.pollutionValidUntil);
+        if (pollutionDate < currentDate) {
+            errors.push('Pollution validity date must be in the future');
+        }
+    }
+
+    if (data.insuranceExpiry) {
+        const insuranceDate = new Date(data.insuranceExpiry);
+        if (insuranceDate < currentDate) {
+            errors.push('Insurance expiry date must be in the future');
+        }
+    }
+
+    // Validate numeric fields
+    if (data.totalKm && (isNaN(data.totalKm) || data.totalKm < 0)) {
+        errors.push('Total kilometers must be a positive number');
+    }
+    
+    if (data.maintenanceCost && (isNaN(data.maintenanceCost) || data.maintenanceCost < 0)) {
+        errors.push('Maintenance cost must be a positive number');
+    }
+    
+    if (data.fuelCharge && (isNaN(data.fuelCharge) || data.fuelCharge < 0)) {
+        errors.push('Fuel charge must be a positive number');
+    }
+
+    // Validate array of drivers
+    if (data.driverAssigned) {
+        if (!Array.isArray(data.driverAssigned)) {
+            errors.push('Driver assigned must be an array');
+        } else {
+            // Check if each driver ID is valid
+            const invalidDrivers = data.driverAssigned.filter(id => !isValidObjectId(id));
+            if (invalidDrivers.length > 0) {
+                errors.push('One or more driver IDs are invalid');
+            }
+        }
+    }
+    
+    if (data.routeAssigned && !isValidObjectId(data.routeAssigned)) {
+        errors.push('Invalid route ID');
+    }
+
+    return errors;
+};
+
+
+
 // Add new vehicle
 exports.addVehicle = async (req, res) => {
     try {
-        const { registrationNumber, driver, type } = req.body;
-
-        if (!registrationNumber || !type) {
-            return res.status(400).json({ error: "registrationNumber or type are required" });
-        }
-
-        // Check if vehicle with registration number already exists
-        const existingVehicle = await Vehicle.findOne({ registrationNumber });
-        if (existingVehicle) {
-            return res.status(400).json({
-                error: 'Vehicle with this registration number already exists'
-            });
-        }
-
-        let imageResponse;
-        if (req.file) { // Assuming `req.file` contains the uploaded file
-            imageResponse = await uploadOnCloudinary(req.file.path);
-            if (!imageResponse) {
-                return res.status(500).json({
-                    error: 'Error uploading image to Cloudinary'
+        // Parse driverAssigned if it's sent as string
+        if (req.body.driverAssigned && typeof req.body.driverAssigned === 'string') {
+            try {
+                req.body.driverAssigned = JSON.parse(req.body.driverAssigned);
+            } catch (e) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid driver assigned format'
                 });
             }
         }
 
-        // Create new vehicle
-        const vehicle = new Vehicle({
-            registrationNumber,
-            driver,
-            type,
-            status: "Active", // Set default status as Active
-            img: imageResponse ? {
-                public_id: imageResponse.public_id,
-                url: imageResponse.url
-            } : undefined
+        // Validate input data
+        const validationErrors = validateVehicleData(req.body);
+        if (validationErrors.length > 0) {
+            return res.status(400).json({ 
+                success: false, 
+                errors: validationErrors 
+            });
+        }
+
+        // Check for duplicate registration/chassis/engine numbers
+        const existingVehicle = await Vehicle.findOne({
+            $or: [
+                { registration: req.body.registration },
+                { chassisNumber: req.body.chassisNumber },
+                { engineNumber: req.body.engineNumber }
+            ]
         });
 
+        if (existingVehicle) {
+            return res.status(400).json({
+                success: false,
+                message: 'Vehicle with this registration, chassis, or engine number already exists'
+            });
+        }
+
+        // Handle image upload
+        let imageData = null;
+        if (req.file) {
+            const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
+            if (!cloudinaryResponse) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Error uploading image'
+                });
+            }
+            imageData = {
+                url: cloudinaryResponse.url,
+                public_id: cloudinaryResponse.public_id
+            };
+        }
+
+        // Create new vehicle
+        const vehicleData = {
+            ...req.body,
+            img: imageData,
+            status: 'active'
+        };
+
+        const vehicle = new Vehicle(vehicleData);
         await vehicle.save();
 
-        // Populate driver details in response
+        // Populate driver information before sending response
         const populatedVehicle = await Vehicle.findById(vehicle._id)
-            .populate('driver', 'name phoneNumber'); // Assuming these are the fields you want from driver
+            .populate('driverAssigned', 'name phoneNumber') // Adjust fields as needed
+            .populate('routeAssigned');
 
         res.status(201).json({
+            success: true,
+            message: 'Vehicle added successfully',
             data: populatedVehicle
         });
 
     } catch (error) {
-        console.error(error);
+        console.error('Error in addVehicle:', error);
         res.status(500).json({
-            error: 'Error adding vehicle'
+            success: false,
+            message: 'Internal server error',
+            error: error.message
         });
     }
 }
@@ -63,62 +161,92 @@ exports.addVehicle = async (req, res) => {
 exports.updateVehicle = async (req, res) => {
     try {
         const { id } = req.params;
-        const updateData = req.body;
 
-        // If registration number is being updated, check for duplicates
-        if (updateData.registrationNumber) {
-            const existingVehicle = await Vehicle.findOne({
-                registrationNumber: updateData.registrationNumber,
-                _id: { $ne: id } // Exclude current vehicle from check
-            });
-
-            if (existingVehicle) {
+        // Parse driverAssigned if it's sent as string
+        if (req.body.driverAssigned && typeof req.body.driverAssigned === 'string') {
+            try {
+                req.body.driverAssigned = JSON.parse(req.body.driverAssigned);
+            } catch (e) {
                 return res.status(400).json({
-                    error: 'Vehicle with this registration number already exists'
+                    success: false,
+                    message: 'Invalid driver assigned format'
                 });
             }
         }
 
-        if (req.file) { // Assuming `req.file` contains the uploaded file
-            const imageResponse = await uploadOnCloudinary(req.file.path);
-            if (!imageResponse) {
-                return res.status(500).json({
-                    error: 'Error uploading image to Cloudinary'
+        if (!isValidObjectId(id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid vehicle ID'
+            });
+        }
+
+        // Validate input data
+        const validationErrors = validateVehicleData(req.body);
+        if (validationErrors.length > 0) {
+            return res.status(400).json({
+                success: false,
+                errors: validationErrors
+            });
+        }
+
+        // Check if vehicle exists
+        const existingVehicle = await Vehicle.findById(id);
+        if (!existingVehicle) {
+            return res.status(404).json({
+                success: false,
+                message: 'Vehicle not found'
+            });
+        }
+
+        // Handle image update if new image is provided
+        let imageData = existingVehicle.img;
+        if (req.file) {
+            const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
+            if (!cloudinaryResponse) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Error uploading new image'
                 });
             }
-            updateData.img = {
-                public_id: imageResponse.public_id,
-                url: imageResponse.url
+            
+            // Delete old image from Cloudinary if it exists
+            if (existingVehicle.img && existingVehicle.img.public_id) {
+                await cloudinary.uploader.destroy(existingVehicle.img.public_id);
+            }
+
+            imageData = {
+                url: cloudinaryResponse.url,
+                public_id: cloudinaryResponse.public_id
             };
         }
 
         // Update vehicle
-        const vehicle = await Vehicle.findByIdAndUpdate(
+        const updatedVehicle = await Vehicle.findByIdAndUpdate(
             id,
-            updateData,
+            {
+                ...req.body,
+                img: imageData
+            },
             { new: true, runValidators: true }
-        ).populate('driver', 'name phoneNumber')
-            .populate('currentRoute', 'name');
+        ).populate('driverAssigned', 'name phoneNumber') // Adjust fields as needed
+         .populate('routeAssigned');
 
-        if (!vehicle) {
-            return res.status(404).json({
-                error: 'Vehicle not found'
-            });
-        }
-
-        res.status(200).json({
+        res.json({
             success: true,
-            data: vehicle
+            message: 'Vehicle updated successfully',
+            data: updatedVehicle
         });
 
     } catch (error) {
-        console.error(error);
+        console.error('Error in updateVehicle:', error);
         res.status(500).json({
-            error: 'Error updating vehicle'
+            success: false,
+            message: 'Internal server error',
+            error: error.message
         });
     }
 }
-
 
 // Get single vehicle
 exports.getVehicle = async (req, res) => {
