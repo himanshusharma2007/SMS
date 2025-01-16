@@ -204,13 +204,13 @@ const DriverTab = () => {
                   >
                     Edit
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => handleDelete(driver.id)}
                     className="flex-1 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors duration-200"
                     disabled
                   >
                     Delete
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </div>

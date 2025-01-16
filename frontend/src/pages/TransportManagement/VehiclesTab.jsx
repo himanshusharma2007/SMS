@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import VehicleForm from "./VehicleForm";
-import { VehicleService } from "../../services/VehicleService";
-import { toast } from "react-toastify"; // Assuming you're using react-toastify for notifications
+import VehicleService from "../../services/VehicleService";
+import { toast } from "react-hot-toast";
 
-const VehicleTab = () => {
+const VehiclesTab = () => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [currentVehicle, setCurrentVehicle] = useState(null);
+  const [selectedVehicleId, setSelectedVehicleId] = useState(null);
 
   useEffect(() => {
     loadVehicles();
@@ -19,58 +18,60 @@ const VehicleTab = () => {
   const loadVehicles = async () => {
     try {
       setLoading(true);
-      const data = await VehicleService.getAllVehicles();
-      console.log("Vehicles:", data.data);
-      setVehicles(data.data);
+      const response = await VehicleService.getAllVehicles();
+      console.log("Vehicles:", response.data);
+      setVehicles(response.data);
     } catch (err) {
       setError(err.message);
-      toast.error(err.message);
+      toast.error("Failed to load vehicles");
     } finally {
       setLoading(false);
     }
   };
 
   const handleAdd = () => {
-    setCurrentVehicle(null);
+    setSelectedVehicleId(null);
     setShowForm(true);
   };
 
-  const handleSave = async (vehicleData) => {
+  const handleEdit = (vehicleId) => {
+    setSelectedVehicleId(vehicleId);
+    setShowForm(true);
+  };
+
+  const handleVehicleSaved = async (vehicleData) => {
     try {
-      if (currentVehicle) {
-        await VehicleService.updateVehicle(currentVehicle.id, vehicleData);
-        toast.success("Vehicle updated successfully");
-      } else {
-        await VehicleService.addVehicle(vehicleData);
-        toast.success("Vehicle added successfully");
-      }
-      setShowForm(false);
-      loadVehicles(); // Reload the list
+      await loadVehicles(); // Reload the list after save
+      toast.success(
+        selectedVehicleId
+          ? "Vehicle updated successfully"
+          : "Vehicle added successfully"
+      );
     } catch (err) {
-      toast.error(err.message);
+      toast.error("Failed to refresh vehicle list");
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (vehicleId) => {
     if (window.confirm("Are you sure you want to delete this vehicle?")) {
       try {
-        await VehicleService.deleteVehicle(id);
+        await VehicleService.deleteVehicle(vehicleId);
         toast.success("Vehicle deleted successfully");
-        loadVehicles();
+        await loadVehicles();
       } catch (err) {
-        toast.error(err.message);
+        toast.error("Failed to delete vehicle");
       }
     }
   };
 
   const filteredVehicles = vehicles.filter(
     (vehicle) =>
-      vehicle.registration.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vehicle.model.toLowerCase().includes(searchTerm.toLowerCase())
+      vehicle.registration?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vehicle.model?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case "active":
         return "bg-green-100 text-green-800";
       case "maintenance":
@@ -81,6 +82,22 @@ const VehicleTab = () => {
         return "bg-gray-100 text-gray-800";
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full text-red-600">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -107,22 +124,21 @@ const VehicleTab = () => {
       {/* Grid Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
         {filteredVehicles.map((vehicle) => (
-          <Link
-            to={`/vehicle/${vehicle.id}`}
-            key={vehicle.id}
-            className="block bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
+          <div
+            key={vehicle._id}
+            className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
           >
             <div className="aspect-video w-full bg-gray-100">
-              {vehicle.img ? (
+              {vehicle.img?.url ? (
                 <img
-                  src={vehicle.img}
+                  src={vehicle.img.url}
                   alt={`${vehicle.model}`}
                   className="w-full h-full object-cover"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-gray-400">
                   {vehicle.model
-                    .split(" ")
+                    ?.split(" ")
                     .map((word) => word[0])
                     .join("")
                     .toUpperCase()}
@@ -151,31 +167,81 @@ const VehicleTab = () => {
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Capacity</span>
+                  <span className="text-gray-500">Chassis Number</span>
+                  <span className="text-gray-900">{vehicle.chassisNumber}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Engine Number</span>
+                  <span className="text-gray-900">{vehicle.engineNumber}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Color</span>
+                  <span className="text-gray-900">{vehicle.color}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Year</span>
                   <span className="text-gray-900">
-                    {vehicle.capacity} seats
+                    {vehicle.yearOfManufacture}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Fuel Type</span>
-                  <span className="text-gray-900">{vehicle.fuelType}</span>
+                  <span className="text-gray-500">Total KM</span>
+                  <span className="text-gray-900">{vehicle.totalKm} km</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Ownership</span>
                   <span className="text-gray-900">{vehicle.ownership}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Driver</span>
-                  <span className="text-gray-900 font-medium">
-                    {vehicle.driverAssigned || "Unassigned"}
+                  <span className="text-gray-500">Insurance Expires</span>
+                  <span className="text-gray-900">
+                    {new Date(vehicle.insuranceExpiry).toLocaleDateString()}
                   </span>
                 </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Last Service Date</span>
+                  <span className="text-gray-900">
+                    {new Date(vehicle.lastServiceDate).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Pollution Valid Until</span>
+                  <span className="text-gray-900">
+                    {new Date(vehicle.pollutionValidUntil).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Maintenance Cost</span>
+                  <span className="text-gray-900">
+                    ${vehicle.maintenanceCost}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Fuel Charge</span>
+                  <span className="text-gray-900">${vehicle.fuelCharge}</span>
+                </div>
+              </div>
+
+              <div className="mt-4 flex justify-end gap-2">
+                <button
+                  onClick={() => handleEdit(vehicle._id)}
+                  className="px-4 py-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(vehicle._id)}
+                  className="px-4 py-2 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
+                  disabled
+                >
+                  Delete
+                </button>
               </div>
             </div>
-          </Link>
+          </div>
         ))}
 
-        {filteredVehicles.length === 0 && (
+        {filteredVehicles.length === 0 && !loading && (
           <div className="col-span-full flex items-center justify-center p-8 text-gray-500">
             No vehicles found.
           </div>
@@ -184,15 +250,13 @@ const VehicleTab = () => {
 
       {showForm && (
         <VehicleForm
-          vehicle={currentVehicle}
           onClose={() => setShowForm(false)}
-          onSave={handleSave}
-          // availableDrivers={availableDrivers}
-          // availableRoutes={availableRoutes}
+          onSave={handleVehicleSaved}
+          vehicleId={selectedVehicleId}
         />
       )}
     </div>
   );
 };
 
-export default VehicleTab;
+export default VehiclesTab;

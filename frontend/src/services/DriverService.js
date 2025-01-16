@@ -49,6 +49,7 @@ class DriverService {
   static async getAllDrivers() {
     try {
       const response = await api.get("/driver");
+      // console.log("getAllDrivers", response.data.data);
       return response.data;
     } catch (error) {
       throw this.handleError(error);

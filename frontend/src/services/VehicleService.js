@@ -8,6 +8,7 @@ export class VehicleService {
       const response = await api.post("/vehicle", vehicleData);
       return response.data;
     } catch (error) {
+      console.log(error)
       this.handleError(error);
     }
   }
@@ -17,6 +18,7 @@ export class VehicleService {
       const response = await api.put(`/vehicle/${id}`, updateData);
       return response.data;
     } catch (error) {
+      console.log(error)
       this.handleError(error);
     }
   }
