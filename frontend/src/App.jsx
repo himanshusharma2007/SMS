@@ -55,7 +55,7 @@ import { selectUser } from "./store/slices/userSlice";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import VehicleTrackingPage from "./pages/VehicleTrackingPage";
-
+import RouteForm from "./pages/TransportManagement/RouteForm";
 
 const App = () => {
   const user = useSelector(selectUser);
@@ -209,6 +209,22 @@ const App = () => {
           element={
             <Layout>
               <VehicleForm />
+            </Layout>
+          }
+        />
+        <Route
+          path="/add-route-form"
+          element={
+            <Layout>
+              <RouteForm />
+            </Layout>
+          }
+        />
+        <Route
+          path="/edit-route-form/:id"
+          element={
+            <Layout>
+              <RouteForm />
             </Layout>
           }
         />

@@ -25,6 +25,7 @@ class RouteService {
   static async getRoute(id) {
     try {
       const response = await api.get(`/vehicle-route/${id}`);
+      console.log("response", response);
       return response.data;
     } catch (error) {
       throw this.handleError(error);
