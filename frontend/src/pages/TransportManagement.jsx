@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import DriversTab from "./TransportManagement/DriversTab";
 import VehiclesTab from "./TransportManagement/VehiclesTab";
 import BusRoute from "./TransportManagement/BusRoute";
+import RouteForm from "./TransportManagement/RouteForm";
 
 const TransportManagement = () => {
   const [activeTab, setActiveTab] = useState("drivers");
@@ -20,7 +21,7 @@ const TransportManagement = () => {
     {
       id: "routes",
       label: "Routes",
-      component: <BusRoute />
+      component: <RouteForm/>
     }
   ];
 

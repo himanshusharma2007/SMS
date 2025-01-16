@@ -34,7 +34,7 @@ const menuConfig = {
     attendance: ["attendance", "staff-attendance"],
     communication: ["parents", "notices", "connections"],
     finance: ["fee-reminder"],
-    transport: ["transport"],
+    transport: ["transport", "VehicleTrackingPage"],
   },
   superAdmin: {
     main: ["dashboard", "students", "teachers", "staff", "class"],
@@ -42,18 +42,20 @@ const menuConfig = {
     attendance: ["attendance", "staff-attendance"],
     communication: ["notices", "connections"],
     finance: ["fee-reminder"],
-    transport: ["transport"],
+    transport: ["transport", "VehicleTrackingPage"],
   },
   teacher: {
     main: ["dashboard", "students", "class"],
     academic: ["time-table", "assesments", "student-marks", "result"],
     attendance: ["attendance"],
     communication: ["parents", "notices", "live-sessions", "connections"],
+    transport: ["VehicleTrackingPage"],
   },
   student: {
     main: ["dashboard"],
     academic: ["time-table", "assesments", "result"],
     communication: ["notices", "live-sessions"],
+    transport: ["VehicleTrackingPage"],
   },
 };
 
@@ -111,6 +113,11 @@ const menuItems = {
     icon: FaBus,
     label: "School Transportation",
     path: "/transport",
+  },
+  VehicleTrackingPage: {
+    icon: FaBus,
+    label: "School VehicleTrackingPage",
+    path: "/VehicleTrackingPage",
   },
 };
 

@@ -54,6 +54,9 @@ import { useEffect, useState } from "react";
 import { selectUser } from "./store/slices/userSlice";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
+import VehicleTrackingPage from "./pages/VehicleTrackingPage";
+
+
 const App = () => {
   const user = useSelector(selectUser);
   const [role, setRole] = useState(null);
@@ -458,6 +461,14 @@ const App = () => {
           element={
             <Layout>
               <EditClassTimeTable />
+            </Layout>
+          }
+        />
+        <Route
+          path="/VehicleTrackingPage"
+          element={
+            <Layout>
+              <VehicleTrackingPage />
             </Layout>
           }
         />
