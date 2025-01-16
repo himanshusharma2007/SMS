@@ -86,7 +86,7 @@ exports.addDriver = async (req, res) => {
           salary,
           address,
           govId,
-        }
+        },
       ],
       { session }
     );
@@ -130,11 +130,11 @@ exports.addDriver = async (req, res) => {
           password: hashedPassword,
           img: imageResponse
             ? {
-              public_id: imageResponse.public_id,
-              url: imageResponse.url,
-            }
-            : undefined
-        }
+                public_id: imageResponse.public_id,
+                url: imageResponse.url,
+              }
+            : undefined,
+        },
       ],
       { session }
     );
@@ -208,12 +208,12 @@ exports.updateDriver = async (req, res) => {
     const duplicateCheck = await Promise.all([
       Driver.findOne({
         licenseNumber,
-        _id: { $ne: driverId }
+        _id: { $ne: driverId },
       }),
       Staff.findOne({
         $or: [{ email }, { phoneNo }, { govId }],
-        _id: { $ne: existingDriver.staffId }
-      })
+        _id: { $ne: existingDriver.staffId },
+      }),
     ]);
 
     if (duplicateCheck[0] || duplicateCheck[1]) {
@@ -235,15 +235,15 @@ exports.updateDriver = async (req, res) => {
 
       // Delete old image from Cloudinary if it exists
       if (existingDriver.img?.public_id) {
-        await cloudinary.uploader.destroy(existingDriver.img.public_id)
-        console.log("Delete Image")
+        await cloudinary.uploader.destroy(existingDriver.img.public_id);
+        console.log("Delete Image");
       }
 
       imageUpdate = {
         img: {
           public_id: imageResponse.public_id,
           url: imageResponse.url,
-        }
+        },
       };
     }
 
@@ -273,7 +273,7 @@ exports.updateDriver = async (req, res) => {
         experience,
         dateOfBirth,
         licenseExpiryDate,
-        ...imageUpdate
+        ...imageUpdate,
       },
       { new: true, session }
     );
@@ -288,9 +288,8 @@ exports.updateDriver = async (req, res) => {
 
     return res.status(200).json({
       message: "Driver updated successfully.",
-      data: updatedDriver
+      data: updatedDriver,
     });
-
   } catch (error) {
     // Abort the transaction on error
     console.log("500", error);
@@ -326,8 +325,10 @@ exports.getDriver = async (req, res) => {
 exports.getAllDrivers = async (req, res) => {
   try {
     const drivers = await Driver.find().populate("staffId assignedVehicle");
+    console.log("drivers", drivers);
     res.status(200).json({ data: drivers });
   } catch (error) {
+    console.log(error);
     res
       .status(500)
       .json({ message: "Failed to retrieve drivers.", error: error.message });
