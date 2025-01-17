@@ -11,18 +11,18 @@ const TransportManagement = () => {
     {
       id: "drivers",
       label: "Drivers",
-      component: <DriversTab />
+      component: <DriversTab />,
     },
     {
       id: "vehicles",
       label: "Vehicles",
-      component: <VehiclesTab />
+      component: <VehiclesTab />,
     },
     {
       id: "routes",
       label: "Routes",
-      component: <RouteForm/>
-    }
+      component: <BusRoute />,
+    },
   ];
 
   return (

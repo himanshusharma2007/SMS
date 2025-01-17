@@ -36,19 +36,12 @@ const VehicleForm = ({ onClose, onSave, vehicleId }) => {
   useEffect(() => {
     const fetchDropdownData = async () => {
       try {
-        console.log("fetchDropdownData");
         const driversResponse = await DriverService.getAllDrivers();
         const routesResponse = await RouteService.getRoutesForDropdown();
-
-        console.log("driversResponse", driversResponse);
-        console.log("routesResponse", routesResponse);
-
-        // Ensure you're accessing the correct property
         const driversData = Array.isArray(driversResponse.data)
           ? driversResponse.data
           : [];
         const routesData = Array.isArray(routesResponse) ? routesResponse : [];
-
         setDrivers(driversData);
         setRoutes(routesData);
       } catch (error) {
@@ -65,10 +58,8 @@ const VehicleForm = ({ onClose, onSave, vehicleId }) => {
       setLoading(true);
       const response = await VehicleService.getVehicle(vehicleId);
       const vehicle = response?.data;
-
       const formatDate = (date) =>
         date ? new Date(date).toISOString().split("T")[0] : "";
-
       setFormData({
         model: vehicle.model || "",
         registration: vehicle.registration || "",
@@ -119,17 +110,15 @@ const VehicleForm = ({ onClose, onSave, vehicleId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const data = new FormData();
       Object.keys(formData).forEach((key) => {
-        console.log(key)
         if (key === "driverAssigned") {
           data.append(key, JSON.stringify(formData[key]));
         } else if (key === "img" && formData[key] instanceof File) {
-          data.append("image",   formData[key]);
+          data.append("image", formData[key]);
         } else if (formData[key] === null) {
-            console.log("skip")
+          // Skip null values
         } else if (
           key === "yearOfManufacture" ||
           key === "totalKm" ||
@@ -163,123 +152,131 @@ const VehicleForm = ({ onClose, onSave, vehicleId }) => {
 
   if (loading) {
     return (
-      <div className="modal">
-        <div className="flex items-center justify-center p-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
+      <div className="fixed inset-0 bg-gray-50/80 backdrop-blur-sm flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
       </div>
     );
   }
 
+  const inputClassName =
+    "mt-1 block w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500";
+  const sectionClassName =
+    "bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200";
+  const headerClassName =
+    "text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2";
+
   return (
-    <div className="modal">
-      <h2 className="text-2xl font-bold mb-6">
-        {vehicleId ? "Edit Vehicle" : "Add New Vehicle"}
-      </h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="form-main grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Basic Information */}
-          <div className="col-span-2">
-            <h3 className="text-xl font-semibold mb-4">Basic Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Model
+    <div className="fixed inset-0 z-50 overflow-y-auto left-72">
+      <div className="flex min-h-screen items-start justify-center p-4">
+        <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-8 mt-4">
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">
+            {vehicleId ? "Edit Vehicle" : "Add New Vehicle"}
+          </h2>
+
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Basic Information */}
+            <section className={sectionClassName}>
+              <h3 className={headerClassName}>
+                <span>Basic Information</span>
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Model
+                  </label>
                   <input
                     type="text"
                     name="model"
                     value={formData.model}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className={inputClassName}
+                    placeholder="Enter vehicle model"
                   />
-                </label>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Registration Number
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Registration Number
+                  </label>
                   <input
                     type="text"
                     name="registration"
                     value={formData.registration}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className={inputClassName}
+                    placeholder="Enter registration number"
                   />
-                </label>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Color
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Color
+                  </label>
                   <input
                     type="text"
                     name="color"
                     value={formData.color}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className={inputClassName}
+                    placeholder="Enter vehicle color"
                   />
-                </label>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Ownership
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Ownership
+                  </label>
                   <select
                     name="ownership"
                     value={formData.ownership}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className={inputClassName}
                   >
                     <option value="owned">Owned</option>
                     <option value="leased">Leased</option>
                     <option value="rented">Rented</option>
                   </select>
-                </label>
+                </div>
               </div>
-            </div>
-          </div>
+            </section>
 
-          {/* Technical Information */}
-          <div className="col-span-2">
-            <h3 className="text-xl font-semibold mb-4">
-              Technical Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Chassis Number
+            {/* Technical Information */}
+            <section className={sectionClassName}>
+              <h3 className={headerClassName}>Technical Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Chassis Number
+                  </label>
                   <input
                     type="text"
                     name="chassisNumber"
                     value={formData.chassisNumber}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className={inputClassName}
+                    placeholder="Enter chassis number"
                   />
-                </label>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Engine Number
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Engine Number
+                  </label>
                   <input
                     type="text"
                     name="engineNumber"
                     value={formData.engineNumber}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className={inputClassName}
+                    placeholder="Enter engine number"
                   />
-                </label>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Year of Manufacture
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Year of Manufacture
+                  </label>
                   <input
                     type="number"
                     name="yearOfManufacture"
@@ -288,14 +285,14 @@ const VehicleForm = ({ onClose, onSave, vehicleId }) => {
                     min="1900"
                     max={new Date().getFullYear()}
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className={inputClassName}
+                    placeholder="Enter manufacture year"
                   />
-                </label>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Total Kilometers
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Total Kilometers
+                  </label>
                   <input
                     type="number"
                     name="totalKm"
@@ -303,72 +300,67 @@ const VehicleForm = ({ onClose, onSave, vehicleId }) => {
                     onChange={handleChange}
                     min="0"
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className={inputClassName}
+                    placeholder="Enter total kilometers"
                   />
-                </label>
+                </div>
               </div>
-            </div>
-          </div>
+            </section>
 
-          {/* Dates and Documentation */}
-          <div className="col-span-2">
-            <h3 className="text-xl font-semibold mb-4">
-              Dates and Documentation
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Pollution Valid Until
+            {/* Dates and Documentation */}
+            <section className={sectionClassName}>
+              <h3 className={headerClassName}>Dates and Documentation</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Pollution Valid Until
+                  </label>
                   <input
                     type="date"
                     name="pollutionValidUntil"
                     value={formData.pollutionValidUntil}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className={inputClassName}
                   />
-                </label>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Last Service Date
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Last Service Date
+                  </label>
                   <input
                     type="date"
                     name="lastServiceDate"
                     value={formData.lastServiceDate}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className={inputClassName}
                   />
-                </label>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Insurance Expiry
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Insurance Expiry
+                  </label>
                   <input
                     type="date"
                     name="insuranceExpiry"
                     value={formData.insuranceExpiry}
                     onChange={handleChange}
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className={inputClassName}
                   />
-                </label>
+                </div>
               </div>
-            </div>
-          </div>
+            </section>
 
-          {/* Operational Information */}
-          <div className="col-span-2">
-            <h3 className="text-xl font-semibold mb-4">
-              Operational Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Maintenance Cost
+            {/* Operational Information */}
+            <section className={sectionClassName}>
+              <h3 className={headerClassName}>Operational Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Maintenance Cost
+                  </label>
                   <input
                     type="number"
                     name="maintenanceCost"
@@ -376,14 +368,14 @@ const VehicleForm = ({ onClose, onSave, vehicleId }) => {
                     onChange={handleChange}
                     min="0"
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className={inputClassName}
+                    placeholder="Enter maintenance cost"
                   />
-                </label>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Fuel Charge
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Fuel Charge
+                  </label>
                   <input
                     type="number"
                     name="fuelCharge"
@@ -391,38 +383,37 @@ const VehicleForm = ({ onClose, onSave, vehicleId }) => {
                     onChange={handleChange}
                     min="0"
                     required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className={inputClassName}
+                    placeholder="Enter fuel charge"
                   />
-                </label>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Route Assigned
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Route Assigned
+                  </label>
                   <select
                     name="routeAssigned"
                     value={formData.routeAssigned}
                     onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className={inputClassName}
                   >
                     <option value="">Select Route</option>
-                    {routes.map((route) => (
-                      <option key={route.value} value={route.value}>
+                    {routes.map((route, index) => (
+                      <option key={index} value={route.value}>
                         {route.label}
                       </option>
                     ))}
                   </select>
-                </label>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Assigned Drivers
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Assigned Drivers
+                  </label>
                   <select
                     multiple
                     value={formData.driverAssigned}
                     onChange={handleDriverAssignmentChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className={`${inputClassName} h-32`}
                   >
                     {drivers.map((driver) => (
                       <option key={driver._id} value={driver._id}>
@@ -430,57 +421,62 @@ const VehicleForm = ({ onClose, onSave, vehicleId }) => {
                       </option>
                     ))}
                   </select>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* Photo Upload */}
-          <div className="col-span-2">
-            <h3 className="text-xl font-semibold mb-4">Vehicle Photo</h3>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Upload Photo
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="mt-1 block w-full"
-                />
-              </label>
-              {formData.img && (
-                <div className="mt-2">
-                  <img
-                    src={
-                      formData.img instanceof File
-                        ? URL.createObjectURL(formData.img)
-                        : formData.img
-                    }
-                    alt="Vehicle Preview"
-                    className="w-24 h-24 object-cover rounded-lg"
-                  />
                 </div>
-              )}
-            </div>
-          </div>
-        </div>
+              </div>
+            </section>
 
-        <div className="flex justify-end space-x-4 mt-6">
-          <button
-            typetype="button"
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            {vehicleId ? "Update Vehicle" : "Add Vehicle"}
-          </button>
+            {/* Photo Upload */}
+            <section className={sectionClassName}>
+              <h3 className={headerClassName}>Vehicle Photo</h3>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-6">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Upload Photo
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    />
+                  </div>
+                  {formData.img && (
+                    <div className="flex-shrink-0">
+                      <img
+                        src={
+                          formData.img instanceof File
+                            ? URL.createObjectURL(formData.img)
+                            : formData.img
+                        }
+                        alt="Vehicle Preview"
+                        className="h-24 w-24 object-cover rounded-lg ring-2 ring-gray-200"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+
+            {/* Form Actions */}
+            <div className="flex justify-end space-x-4 pt-6 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+              >
+                {vehicleId ? "Update Vehicle" : "Add Vehicle"}
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   );
 };
