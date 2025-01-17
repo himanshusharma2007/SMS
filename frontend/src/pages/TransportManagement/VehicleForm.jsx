@@ -26,6 +26,7 @@ const VehicleForm = ({ onClose, onSave, vehicleId }) => {
   });
   const [drivers, setDrivers] = useState([]);
   const [routes, setRoutes] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (vehicleId) {
@@ -110,6 +111,7 @@ const VehicleForm = ({ onClose, onSave, vehicleId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true); // Start submission process
     try {
       const data = new FormData();
       Object.keys(formData).forEach((key) => {
@@ -147,6 +149,8 @@ const VehicleForm = ({ onClose, onSave, vehicleId }) => {
       onClose();
     } catch (error) {
       toast.error(error.message || "Failed to save vehicle");
+    } finally {
+      setIsSubmitting(false); // End submission process
     }
   };
 
@@ -166,7 +170,7 @@ const VehicleForm = ({ onClose, onSave, vehicleId }) => {
     "text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2";
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto left-72">
+    <div className="fixed inset-0 z-50  bg-black bg-opacity-50 overflow-y-auto left-72">
       <div className="flex min-h-screen items-start justify-center p-4">
         <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-8 mt-4">
           <h2 className="text-3xl font-bold text-gray-900 mb-8">
@@ -469,9 +473,18 @@ const VehicleForm = ({ onClose, onSave, vehicleId }) => {
               </button>
               <button
                 type="submit"
-                className="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                disabled={isSubmitting}
+                className={`px-6 py-2.5 text-sm font-medium text-white ${
+                  isSubmitting ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"
+                } border border-transparent rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200`}
               >
-                {vehicleId ? "Update Vehicle" : "Add Vehicle"}
+                {isSubmitting
+                  ? vehicleId
+                    ? "Updating..."
+                    : "Adding..."
+                  : vehicleId
+                  ? "Update Vehicle"
+                  : "Add Vehicle"}
               </button>
             </div>
           </form>

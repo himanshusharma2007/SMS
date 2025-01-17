@@ -1,26 +1,20 @@
 import React, { useState, useEffect } from "react";
-import "./DriversTab.css";
 import DriverService from "../../services/DriverService";
 import { toast } from "react-hot-toast";
 
 const DriverForm = ({ onClose, onSave, driverId }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    // Personal Information
     name: "",
     email: "",
     phoneNo: "",
     address: "",
     govId: "",
-
-    // Professional Information
     licenseNumber: "",
     experience: "",
     dateOfBirth: "",
     licenseExpiryDate: "",
     salary: "",
-
-    // Photo
     img: null,
   });
 
@@ -35,7 +29,6 @@ const DriverForm = ({ onClose, onSave, driverId }) => {
       setLoading(true);
       const response = await DriverService.getDriver(driverId);
       const driver = response.data;
-      console.log("driver:", driver);
 
       const formatDate = (date) =>
         date ? new Date(date).toISOString().split("T")[0] : "";
@@ -76,9 +69,9 @@ const DriverForm = ({ onClose, onSave, driverId }) => {
     e.preventDefault();
 
     try {
+      setLoading(true); // Set loading to true
       const data = new FormData();
       Object.keys(formData).forEach((key) => {
-        console.log("key:", formData[key]);
         data.append(key, formData[key]);
       });
 
@@ -96,178 +89,239 @@ const DriverForm = ({ onClose, onSave, driverId }) => {
       onClose();
     } catch (error) {
       toast.error(error.message || "Failed to save driver");
+    } finally {
+      setLoading(false); // Set loading back to false
     }
   };
 
   if (loading) {
     return (
-      <div className="modal">
-        <div className="flex items-center justify-center p-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="modal">
-      <h2>{driverId ? "Edit Driver" : "Add New Driver"}</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="form-main">
-          {/* Personal Information */}
-          <h3>Personal Information</h3>
-          <label>
-            Name
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-          </label>
+    <div className="fixed left-60 inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
+            {driverId ? "Edit Driver" : "Add New Driver"}
+          </h2>
 
-          <label>
-            Email
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </label>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Personal Information Section */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-700 mb-4">
+                Personal Information
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
 
-          <label>
-            Phone Number
-            <input
-              type="text"
-              name="phoneNo"
-              value={formData.phoneNo}
-              onChange={handleChange}
-              required
-            />
-          </label>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
 
-          <label>
-            Address
-            <input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              required
-            />
-          </label>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    name="phoneNo"
+                    value={formData.phoneNo}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
 
-          <label>
-            Government ID
-            <input
-              type="text"
-              name="govId"
-              value={formData.govId}
-              onChange={handleChange}
-              required
-            />
-          </label>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Government ID
+                  </label>
+                  <input
+                    type="text"
+                    name="govId"
+                    value={formData.govId}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
 
-          {/* Professional Information */}
-          <h3>Professional Information</h3>
-          <label>
-            License Number
-            <input
-              type="text"
-              name="licenseNumber"
-              value={formData.licenseNumber}
-              onChange={handleChange}
-              required
-            />
-          </label>
-
-          <label>
-            Experience (in years)
-            <input
-              type="number"
-              name="experience"
-              value={formData.experience}
-              onChange={handleChange}
-              required
-            />
-          </label>
-
-          <label>
-            Date of Birth
-            <input
-              type="date"
-              name="dateOfBirth"
-              value={formData.dateOfBirth}
-              onChange={handleChange}
-              required
-            />
-          </label>
-
-          <label>
-            License Expiry Date
-            <input
-              type="date"
-              name="licenseExpiryDate"
-              value={formData.licenseExpiryDate}
-              onChange={handleChange}
-              required
-            />
-          </label>
-
-          <label>
-            Salary
-            <input
-              type="number"
-              name="salary"
-              value={formData.salary}
-              onChange={handleChange}
-              required
-            />
-          </label>
-
-          {/* Upload Photo */}
-          <h3>Photo</h3>
-          <label>
-            Upload Photo
-            <input type="file" accept="image/*" onChange={handleFileChange} />
-          </label>
-          {formData?.img && (
-            <div className="photo-preview">
-              {formData?.img instanceof File ? (
-                <img
-                  src={URL.createObjectURL(formData?.img)}
-                  alt="Preview"
-                  style={{
-                    width: "100px",
-                    height: "100px",
-                    borderRadius: "50%",
-                  }}
-                />
-              ) : (
-                <img
-                  src={formData?.img}
-                  alt="Preview"
-                  style={{
-                    width: "100px",
-                    height: "100px",
-                    borderRadius: "50%",
-                  }}
-                />
-              )}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Address
+                  </label>
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+              </div>
             </div>
-          )}
-        </div>
 
-        <div className="form-actions">
-          <button type="submit">Save</button>
-          <button type="button" onClick={onClose}>
-            Cancel
-          </button>
+            {/* Professional Information Section */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-700 mb-4">
+                Professional Information
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    License Number
+                  </label>
+                  <input
+                    type="text"
+                    name="licenseNumber"
+                    value={formData.licenseNumber}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Experience (years)
+                  </label>
+                  <input
+                    type="number"
+                    name="experience"
+                    value={formData.experience}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Date of Birth
+                  </label>
+                  <input
+                    type="date"
+                    name="dateOfBirth"
+                    value={formData.dateOfBirth}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    License Expiry Date
+                  </label>
+                  <input
+                    type="date"
+                    name="licenseExpiryDate"
+                    value={formData.licenseExpiryDate}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Salary
+                  </label>
+                  <input
+                    type="number"
+                    name="salary"
+                    value={formData.salary}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Photo Section */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-700 mb-4">Photo</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Upload Photo
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                {formData?.img && (
+                  <div className="flex justify-center">
+                    <img
+                      src={
+                        formData?.img instanceof File
+                          ? URL.createObjectURL(formData?.img)
+                          : formData?.img
+                      }
+                      alt="Preview"
+                      className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Form Actions */}
+            <div className="flex justify-end space-x-4 pt-6">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className={`px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                  loading ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+                disabled={loading} // Disable the button when loading
+              >
+                {loading ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   );
 };

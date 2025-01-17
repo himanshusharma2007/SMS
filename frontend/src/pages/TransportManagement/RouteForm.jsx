@@ -6,22 +6,57 @@ import {
   Popup,
   useMapEvents,
 } from "react-leaflet";
+import { MapPin } from "lucide-react";
 import VehicleService from "../../services/VehicleService";
 import RouteService from "../../services/RouteService";
 import { useNavigate, useParams } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
-// Fix for default marker icons
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-  iconUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-  shadowUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-});
+// Custom icon creation
+const createCustomIcon = () => {
+  return L.divIcon({
+    html: `<div class="custom-marker">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500">
+  <path d="M12 2C8.134 2 5 5.134 5 9c0 5.25 5 10.25 7 12 2-1.75 7-6.75 7-12 0-3.866-3.134-7-7-7z"></path>
+  <circle cx="12" cy="9" r="3"></circle>
+  <defs>
+    <radialGradient id="gradient" cx="12" cy="9" r="12" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4facfe" />
+      <stop offset="100%" stop-color="#00f2fe" />
+    </radialGradient>
+  </defs>
+  <path d="M12 2C8.134 2 5 5.134 5 9c0 5.25 5 10.25 7 12 2-1.75 7-6.75 7-12 0-3.866-3.134-7-7-7z" fill="url(#gradient)" opacity="0.2"></path>
+</svg>
+
+           </div>`,
+    className: "custom-marker-container",
+    iconSize: [24, 24],
+    iconAnchor: [12, 24],
+    popupAnchor: [0, -24],
+  });
+};
+
+// Add styles to document head
+const markerStyles = `
+  .custom-marker-container {
+    background: transparent;
+    border: none;
+  }
+  .custom-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .custom-marker svg {
+    color: #3B82F6;
+    filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.2));
+  }
+`;
+
+const styleSheet = document.createElement("style");
+styleSheet.textContent = markerStyles;
+document.head.appendChild(styleSheet);
 
 // Map Click Handler Component
 const MapClickHandler = ({ onMapClick }) => {
@@ -51,6 +86,8 @@ const RouteForm = () => {
   const [mapCenter, setMapCenter] = useState([26.9124, 75.7873]);
   const [mapZoom, setMapZoom] = useState(9.5);
   const [mapRef, setMapRef] = useState(null);
+
+  const customIcon = createCustomIcon();
 
   useEffect(() => {
     const initializeForm = async () => {
@@ -276,7 +313,6 @@ const RouteForm = () => {
                   Stops
                 </label>
 
-                {/* Manual Coordinates Input */}
                 <div className="flex gap-2 mb-4">
                   <div className="flex-1">
                     <input
@@ -299,9 +335,9 @@ const RouteForm = () => {
                   <button
                     type="button"
                     onClick={handleManualCoordinates}
-                    className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    className="inline-flex items-center px-4 py-2 text-gray-700 hover:text-blue-600 focus:outline-none"
                   >
-                    Mark Location
+                    <MapPin className="w-5 h-5" />
                   </button>
                 </div>
 
@@ -321,6 +357,7 @@ const RouteForm = () => {
                     {selectedPosition && (
                       <Marker
                         position={[selectedPosition.lat, selectedPosition.lng]}
+                        icon={customIcon}
                       >
                         <Popup>
                           Selected Location
@@ -333,7 +370,11 @@ const RouteForm = () => {
                     )}
 
                     {formData.stops.map((stop, index) => (
-                      <Marker key={index} position={[stop.lat, stop.lng]}>
+                      <Marker
+                        key={index}
+                        position={[stop.lat, stop.lng]}
+                        icon={customIcon}
+                      >
                         <Popup>
                           <div>
                             <strong>{stop.stop}</strong>
@@ -398,7 +439,7 @@ const RouteForm = () => {
 
               <div className="flex justify-end gap-4 pt-4">
                 <button
-                  type="button"
+                  typetype="button"
                   onClick={() => navigate(-1)}
                   className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
                 >
