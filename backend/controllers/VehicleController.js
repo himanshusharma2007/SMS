@@ -1,6 +1,7 @@
 const Vehicle = require("../models/vehicleModels");
 const uploadOnCloudinary = require("../utils/cloudinary");
 const { isValidObjectId } = require("mongoose");
+const emptyTempFolder = require("../utils/emptyTempFolder");
 
 const validateVehicleData = (data) => {
   const errors = [];
@@ -165,6 +166,8 @@ exports.addVehicle = async (req, res) => {
       message: "Internal server error",
       error: error.message,
     });
+  } finally {
+    await emptyTempFolder()
   }
 };
 
@@ -259,6 +262,8 @@ exports.updateVehicle = async (req, res) => {
       message: "Internal server error",
       error: error.message,
     });
+  } finally {
+    await emptyTempFolder()
   }
 };
 

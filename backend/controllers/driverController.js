@@ -5,6 +5,7 @@ const Staff = require("../models/staffModels");
 const generateUniqueId = require("../utils/generateId");
 const hashPassword = require("../utils/password");
 const uploadOnCloudinary = require("../utils/cloudinary");
+const emptyTempFolder = require("../utils/emptyTempFolder");
 
 // Add a new driver
 exports.addDriver = async (req, res) => {
@@ -130,9 +131,9 @@ exports.addDriver = async (req, res) => {
           password: hashedPassword,
           img: imageResponse
             ? {
-                public_id: imageResponse.public_id,
-                url: imageResponse.url,
-              }
+              public_id: imageResponse.public_id,
+              url: imageResponse.url,
+            }
             : undefined,
         },
       ],
@@ -157,6 +158,8 @@ exports.addDriver = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Failed to add driver.", error: error.message });
+  } finally {
+    await emptyTempFolder()
   }
 };
 
@@ -299,6 +302,8 @@ exports.updateDriver = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Failed to update driver.", error: error.message });
+  } finally {
+    await emptyTempFolder()
   }
 };
 

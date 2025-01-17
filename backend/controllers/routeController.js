@@ -1,5 +1,6 @@
 const Route = require("../models/RouteModels");
 const Vehicle = require("../models/vehicleModels");
+const emptyTempFolder = require("../utils/emptyTempFolder");
 
 
 
@@ -20,8 +21,8 @@ exports.createRoute = async (req, res) => {
         }
 
         stops.forEach(e => {
-            if(!e.stop || !e.lng || !e.lat || !e.sequence){
-                return res.status(400).json({error: `Please enter name, lat, lng, sequence of stop plece`})
+            if (!e.stop || !e.lng || !e.lat || !e.sequence) {
+                return res.status(400).json({ error: `Please enter name, lat, lng, sequence of stop plece` })
             }
         });
 
@@ -37,6 +38,8 @@ exports.createRoute = async (req, res) => {
     } catch (error) {
         console.log(error)
         return res.status(500).json({ error: "Failed to create route." });
+    } finally {
+        await emptyTempFolder()
     }
 };
 
@@ -51,10 +54,10 @@ exports.updateRoute = async (req, res) => {
             return res.status(400).json({ error: "Route ID is required for update." });
         }
 
-        if(stops){
+        if (stops) {
             stops.forEach(e => {
-                if(!e.stop || !e.lng || !e.lat || !e.sequence){
-                    return res.status(400).json({error: `Please enter name, lat, lng, sequence of stop plece`})
+                if (!e.stop || !e.lng || !e.lat || !e.sequence) {
+                    return res.status(400).json({ error: `Please enter name, lat, lng, sequence of stop plece` })
                 }
             });
         }
@@ -74,6 +77,8 @@ exports.updateRoute = async (req, res) => {
     } catch (error) {
         console.log(error)
         return res.status(500).json({ error: "Failed to update route." });
+    } finally {
+        await emptyTempFolder()
     }
 };
 
