@@ -56,6 +56,8 @@ import TeacherDashboard from "./pages/TeacherDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import VehicleTrackingPage from "./pages/VehicleTrackingPage";
 import RouteForm from "./pages/TransportManagement/RouteForm";
+import VehicleHistoriesPage from "./pages/VehicleHistoriesPage";
+import AddVehicleHistoryForm from "./forms/AddVehicleHistoryForm";
 
 const App = () => {
   const user = useSelector(selectUser);
@@ -225,6 +227,22 @@ const App = () => {
           element={
             <Layout>
               <RouteForm />
+            </Layout>
+          }
+        />
+        <Route
+          path="/vehicle-histories"
+          element={
+            <Layout>
+              <VehicleHistoriesPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/add-vehicle-history-form"
+          element={
+            <Layout>
+              <AddVehicleHistoryForm />
             </Layout>
           }
         />
@@ -481,7 +499,7 @@ const App = () => {
           }
         />
         <Route
-          path="/VehicleTrackingPage"
+          path="/vehicle-tracking"
           element={
             <Layout>
               <VehicleTrackingPage />

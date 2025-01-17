@@ -43,7 +43,7 @@ export class VehicleHistoryService {
       if (params.vehicle) queryParams.append('vehicle', params.vehicle);
       if (params.driver) queryParams.append('driver', params.driver);
       if (params.route) queryParams.append('route', params.route);
-      if (params.completed !== undefined) queryParams.append('completed', params.completed);
+      // if (params.completed !== undefined) queryParams.append('completed', params.completed);
       
       const response = await api.get(`/vehicle-history?${queryParams.toString()}`);
       return response.data;

@@ -117,7 +117,7 @@ const menuItems = {
   VehicleTrackingPage: {
     icon: FaBus,
     label: "School VehicleTrackingPage",
-    path: "/VehicleTrackingPage",
+    path: "/vehicle-histories",
   },
 };
 
@@ -385,7 +385,7 @@ const Sidebar = () => {
       >
         <FaBars className="w-6 h-6" />
       </button>
-    </div> 
+    </div>
   );
 };
 
