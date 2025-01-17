@@ -180,7 +180,7 @@ const VehicleHistoriesPage = () => {
                 <tr
                   key={history._id}
                   className="hover:bg-gray-50"
-                  onClick={() => navigate("/vehicle-tracking")}
+                  onClick={() => navigate(`/vehicle-tracking/${history._id}`)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     {new Date(history.date).toLocaleDateString()}
