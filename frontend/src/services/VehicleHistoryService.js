@@ -7,7 +7,7 @@ export class VehicleHistoryService {
         vehicleId: historyData.vehicleId,
         driverId: historyData.driverId,
         routeId: historyData.routeId,
-        date: historyData.date
+        date: historyData.date,
       });
       return response.data;
     } catch (error) {
@@ -18,8 +18,8 @@ export class VehicleHistoryService {
   static async updateVehicleHistoryStop(updateData) {
     try {
       const response = await api.put("/vehicle-history", {
-        historyId: updateData.historyId,
-        stopName: updateData.stopName
+        historyId: updateData.id,
+        stopName: updateData.stopName,
       });
       return response.data;
     } catch (error) {
@@ -30,22 +30,24 @@ export class VehicleHistoryService {
   static async getVehicleHistories(params = {}) {
     try {
       const queryParams = new URLSearchParams();
-      
+
       // Add pagination parameters
-      if (params.page) queryParams.append('page', params.page);
-      if (params.limit) queryParams.append('limit', params.limit);
-      
+      if (params.page) queryParams.append("page", params.page);
+      if (params.limit) queryParams.append("limit", params.limit);
+
       // Add filters
-      if (params.id) queryParams.append('id', params.id);
-      if (params.stopName) queryParams.append('stopName', params.stopName);
-      if (params.startDate) queryParams.append('startDate', params.startDate);
-      if (params.endDate) queryParams.append('endDate', params.endDate);
-      if (params.vehicle) queryParams.append('vehicle', params.vehicle);
-      if (params.driver) queryParams.append('driver', params.driver);
-      if (params.route) queryParams.append('route', params.route);
+      if (params.id) queryParams.append("id", params.id);
+      if (params.stopName) queryParams.append("stopName", params.stopName);
+      if (params.startDate) queryParams.append("startDate", params.startDate);
+      if (params.endDate) queryParams.append("endDate", params.endDate);
+      if (params.vehicle) queryParams.append("vehicle", params.vehicle);
+      if (params.driver) queryParams.append("driver", params.driver);
+      if (params.route) queryParams.append("route", params.route);
       // if (params.completed !== undefined) queryParams.append('completed', params.completed);
-      
-      const response = await api.get(`/vehicle-history?${queryParams.toString()}`);
+
+      const response = await api.get(
+        `/vehicle-history?${queryParams.toString()}`
+      );
       return response.data;
     } catch (error) {
       this.handleError(error);

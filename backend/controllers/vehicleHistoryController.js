@@ -69,6 +69,7 @@ exports.addVehicleHistory = async (req, res) => {
 // Update vehicle history when stop is reached
 exports.updateVehicleHistoryStop = async (req, res) => {
   try {
+    console.log("req,body", req.body);
     const { historyId, stopName } = req.body;
 
     // Find vehicle history entry
