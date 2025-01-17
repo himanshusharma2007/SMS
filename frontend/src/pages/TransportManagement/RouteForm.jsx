@@ -46,6 +46,8 @@ const RouteForm = () => {
   });
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [stopName, setStopName] = useState("");
+  const [manualLat, setManualLat] = useState("");
+  const [manualLng, setManualLng] = useState("");
   const [mapCenter, setMapCenter] = useState([26.9124, 75.7873]);
   const [mapZoom, setMapZoom] = useState(9.5);
   const [mapRef, setMapRef] = useState(null);
@@ -80,7 +82,6 @@ const RouteForm = () => {
   const fetchRouteData = async () => {
     try {
       const response = await RouteService.getRoute(id);
-      console.log("RouteData:", response);
       const routeData = response.data;
 
       setFormData({
@@ -89,11 +90,9 @@ const RouteForm = () => {
         stops: routeData.stops || [],
       });
 
-      // Center map on first stop if available
       if (routeData.stops && routeData.stops.length > 0) {
         const firstStop = routeData.stops[0];
         setMapCenter([firstStop.lat, firstStop.lng]);
-        // Adjust map bounds to show all stops
         if (mapRef) {
           const bounds = L.latLngBounds(
             routeData.stops.map((stop) => [stop.lat, stop.lng])
@@ -109,6 +108,33 @@ const RouteForm = () => {
   const handleMapClick = (e) => {
     const { lat, lng } = e.latlng;
     setSelectedPosition({ lat, lng });
+    setManualLat(lat.toFixed(6));
+    setManualLng(lng.toFixed(6));
+    setError("");
+  };
+
+  const handleManualCoordinates = () => {
+    const lat = parseFloat(manualLat);
+    const lng = parseFloat(manualLng);
+
+    if (
+      isNaN(lat) ||
+      isNaN(lng) ||
+      lat < -90 ||
+      lat > 90 ||
+      lng < -180 ||
+      lng > 180
+    ) {
+      setError(
+        "Please enter valid coordinates (Latitude: -90 to 90, Longitude: -180 to 180)"
+      );
+      return;
+    }
+
+    setSelectedPosition({ lat, lng });
+    if (mapRef) {
+      mapRef.setView([lat, lng], mapZoom);
+    }
     setError("");
   };
 
@@ -131,6 +157,8 @@ const RouteForm = () => {
     }));
     setStopName("");
     setSelectedPosition(null);
+    setManualLat("");
+    setManualLng("");
     setError("");
   };
 
@@ -149,7 +177,6 @@ const RouteForm = () => {
     e.preventDefault();
 
     try {
-      // Validate form data
       if (!formData.name.trim()) {
         throw new Error("Please enter a route name");
       }
@@ -162,7 +189,6 @@ const RouteForm = () => {
         throw new Error("Please add at least two stops for the route");
       }
 
-      // Prepare data for submission
       const routeData = {
         ...formData,
         stops: formData.stops.map((stop, index) => ({
@@ -247,8 +273,38 @@ const RouteForm = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Stops (Click on the map to select location)
+                  Stops
                 </label>
+
+                {/* Manual Coordinates Input */}
+                <div className="flex gap-2 mb-4">
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={manualLat}
+                      onChange={(e) => setManualLat(e.target.value)}
+                      placeholder="Latitude"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={manualLng}
+                      onChange={(e) => setManualLng(e.target.value)}
+                      placeholder="Longitude"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleManualCoordinates}
+                    className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    Mark Location
+                  </button>
+                </div>
+
                 <div className="h-[400px] rounded-lg overflow-hidden border border-gray-300">
                   <MapContainer
                     center={mapCenter}
@@ -266,7 +322,13 @@ const RouteForm = () => {
                       <Marker
                         position={[selectedPosition.lat, selectedPosition.lng]}
                       >
-                        <Popup>Selected Location</Popup>
+                        <Popup>
+                          Selected Location
+                          <br />
+                          Lat: {selectedPosition.lat.toFixed(6)}
+                          <br />
+                          Lng: {selectedPosition.lng.toFixed(6)}
+                        </Popup>
                       </Marker>
                     )}
 
@@ -277,6 +339,10 @@ const RouteForm = () => {
                             <strong>{stop.stop}</strong>
                             <br />
                             Stop {stop.sequence}
+                            <br />
+                            Lat: {stop.lat.toFixed(6)}
+                            <br />
+                            Lng: {stop.lng.toFixed(6)}
                           </div>
                         </Popup>
                       </Marker>
@@ -312,7 +378,8 @@ const RouteForm = () => {
                             className="flex justify-between items-center"
                           >
                             <span>
-                              {stop.stop} (Stop {stop.sequence})
+                              {stop.stop} (Stop {stop.sequence}) - Lat:{" "}
+                              {stop.lat.toFixed(6)}, Lng: {stop.lng.toFixed(6)}
                             </span>
                             <button
                               type="button"
