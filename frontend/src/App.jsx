@@ -57,6 +57,7 @@ import StudentDashboard from "./pages/StudentDashboard";
 import VehicleTrackingPage from "./pages/VehicleTrackingPage";
 import RouteForm from "./pages/TransportManagement/RouteForm";
 import VehicleHistoriesPage from "./pages/VehicleHistoriesPage";
+import ShowVehicleTracking from "./pages/ShowVehicleTracking";
 import AddVehicleHistoryForm from "./forms/AddVehicleHistoryForm";
 
 const App = () => {
@@ -503,6 +504,14 @@ const App = () => {
           element={
             <Layout>
               <VehicleTrackingPage />
+            </Layout>
+          }
+        />
+        <Route
+          path="/show-tracking/:id"
+          element={
+            <Layout>
+              <ShowVehicleTracking/>
             </Layout>
           }
         />

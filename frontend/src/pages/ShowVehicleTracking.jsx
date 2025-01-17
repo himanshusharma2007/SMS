@@ -13,16 +13,13 @@ L.Icon.Default.mergeOptions({
   shadowUrl: '/marker-shadow.png',
 });
 
-const VehicleTrackingPage = () => {
+const ShowVehicleTracking = () => {
   const { id } = useParams();
   const [vehicleHistory, setVehicleHistory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchVehicleHistory();
-  }, [id]);
-
+  // Function to fetch vehicle history
   const fetchVehicleHistory = async () => {
     try {
       const response = await VehicleHistoryService.getVehicleHistoryById(id);
@@ -36,20 +33,16 @@ const VehicleTrackingPage = () => {
     }
   };
 
-  const handleUpdateStop = async (stopName) => {
-    try {
-      setLoading(true);
-      await VehicleHistoryService.updateVehicleHistoryStop({
-        id,
-        stopName,
-      });
-      await fetchVehicleHistory();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Initial fetch and setup interval for auto-refresh
+  useEffect(() => {
+    fetchVehicleHistory();
+    
+    // Set up auto-refresh every 5 minutes
+    const intervalId = setInterval(fetchVehicleHistory, 5 * 60 * 1000);
+    
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
+  }, [id]);
 
   const MapComponent = ({ vehicleHistory }) => {
     if (!vehicleHistory) return null;
@@ -159,15 +152,6 @@ const VehicleTrackingPage = () => {
                     : "Not arrived"}
                 </div>
               </div>
-              {stop.reached === "Next" && !vehicleHistory.completed && (
-                <button
-                  onClick={() => handleUpdateStop(stop.stop)}
-                  disabled={loading}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-blue-300"
-                >
-                  {loading ? "Updating..." : "Mark Reached"}
-                </button>
-              )}
               <div
                 className={`w-3 h-3 rounded-full ${
                   stop.reached === "Reached"
@@ -197,4 +181,4 @@ const VehicleTrackingPage = () => {
   );
 };
 
-export default VehicleTrackingPage;
+export default ShowVehicleTracking;

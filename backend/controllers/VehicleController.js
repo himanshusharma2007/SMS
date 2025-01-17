@@ -80,6 +80,7 @@ const validateVehicleData = (data) => {
 // Add new vehicle
 exports.addVehicle = async (req, res) => {
   try {
+    console.log(req.body)
     // Parse driverAssigned if it's sent as string
     if (
       req.body.driverAssigned &&
