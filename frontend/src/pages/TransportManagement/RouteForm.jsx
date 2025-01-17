@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import React, { useState, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import VehicleService from '../../services/VehicleService';
 import RouteService from '../../services/RouteService';
 import { useNavigate, useParams } from 'react-router-dom';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
 
 const RouteForm = () => {
   const navigate = useNavigate();
@@ -145,7 +148,7 @@ const RouteForm = () => {
                   <option value="">Select a vehicle</option>
                   {vehicles.map((vehicle) => (
                     <option key={vehicle._id} value={vehicle._id}>
-                      {vehicle.name}
+                      {vehicle.model} {vehicle.registration}
                     </option>
                   ))}
                 </select>
