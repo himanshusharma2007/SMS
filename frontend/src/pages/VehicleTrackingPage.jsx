@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Polyline } from "react-leaflet";
+import { useParams } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import AddVehicleHistoryForm from "../forms/AddVehicleHistoryForm";
+import { VehicleHistoryService } from "../services/VehicleHistoryService";
 
 // Custom marker icon setup
 delete L.Icon.Default.prototype._getIconUrl;
@@ -12,73 +13,42 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "/marker-shadow.png",
 });
 
-// Dummy data
-const dummyVehicles = [
-  { _id: "1", registration: "ABC123", model: "Toyota Van" },
-  { _id: "2", registration: "XYZ789", model: "Ford Transit" },
-];
-
-const dummyDrivers = [
-  { _id: "1", name: "John Doe", phoneNumber: "555-0123" },
-  { _id: "2", name: "Jane Smith", phoneNumber: "555-0124" },
-];
-
-const dummyRoutes = [
-  {
-    _id: "1",
-    name: "City Center Route",
-    stops: [
-      { stop: "Central Station", lng: 13.404954, lat: 52.520008 },
-      { stop: "Mall Plaza", lng: 13.414954, lat: 52.520508 },
-      { stop: "Business Park", lng: 13.424954, lat: 52.521008 },
-      { stop: "Tech Hub", lng: 13.434954, lat: 52.521508 },
-    ],
-  },
-  {
-    _id: "2",
-    name: "Suburban Route",
-    stops: [
-      { stop: "Suburb Station", lng: 13.444954, lat: 52.522008 },
-      { stop: "Park & Ride", lng: 13.454954, lat: 52.522508 },
-      { stop: "Shopping Center", lng: 13.464954, lat: 52.523008 },
-    ],
-  },
-];
-
 const VehicleTrackingPage = () => {
+  const { id } = useParams();
   const [vehicleHistory, setVehicleHistory] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleAddHistory = ({
-    selectedVehicle,
-    selectedDriver,
-    selectedRoute,
-    date,
-  }) => {
-    setLoading(true);
-    const selectedRouteData = dummyRoutes.find(
-      (route) => route._id === selectedRoute
-    );
+  useEffect(() => {
+    fetchVehicleHistory();
+  }, [id]);
 
-    // Create dummy history with initial status
-    const newHistory = {
-      _id: Math.random().toString(36).substr(2, 9),
-      vehicle: dummyVehicles.find((v) => v._id === selectedVehicle),
-      driver: dummyDrivers.find((d) => d._id === selectedDriver),
-      route: selectedRouteData,
-      date: new Date(date),
-      stops: selectedRouteData.stops.map((stop, index) => ({
-        ...stop,
-        reached: index === 0 ? "Next" : "Pending",
-        arrivalTime: null,
-      })),
-      completed: false,
-    };
-
-    setTimeout(() => {
-      setVehicleHistory(newHistory);
+  const fetchVehicleHistory = async () => {
+    try {
+      const response = await VehicleHistoryService.getVehicleHistoryById(id);
+      console.log("VehicleHistory Track", response);
+      setVehicleHistory(response);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
       setLoading(false);
-    }, 500);
+    }
+  };
+
+  const handleUpdateStop = async (stopName) => {
+    try {
+      setLoading(true);
+      await VehicleHistoryService.updateVehicleHistoryStop({
+        id,
+        stopName,
+      });
+      await fetchVehicleHistory();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const MapComponent = ({ vehicleHistory }) => {
@@ -141,21 +111,94 @@ const VehicleTrackingPage = () => {
     );
   };
 
+  if (loading && !vehicleHistory) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-xl text-red-600">Error: {error}</div>
+      </div>
+    );
+  }
+
+  if (!vehicleHistory) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-xl">No vehicle history found</div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
       <div className="w-1/4 bg-white p-4 shadow-lg overflow-y-auto">
-        {!vehicleHistory ? (
-          <AddVehicleHistoryForm
-            vehicles={dummyVehicles}
-            drivers={dummyDrivers}
-            routes={dummyRoutes}
-            onAddHistory={handleAddHistory}
-            loading={loading}
-          />
-        ) : (
-          <div className="space-y-4">{/* Vehicle History Details */}</div>
-        )}
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold mb-4">Route Progress</h2>
+          <div className="mb-4">
+            <div className="font-bold">
+              {vehicleHistory.vehicle?.registration} -{" "}
+              {vehicleHistory.vehicle?.model}
+            </div>
+            <div className="text-sm text-gray-500">
+              Driver: {vehicleHistory.driver?.staffId?.name}
+              <br />
+              Phone: {vehicleHistory.driver?.staffId?.phoneNo}
+            </div>
+            <div className="text-sm text-gray-500">
+              Route: {vehicleHistory.route?.name}
+            </div>
+            <div className="text-sm text-gray-500">
+              Date: {new Date(vehicleHistory.date).toLocaleDateString()}
+            </div>
+          </div>
+          {vehicleHistory.stops.map((stop, index) => (
+            <div
+              key={index}
+              className="p-4 border rounded flex items-center justify-between"
+            >
+              <div>
+                <div className="font-bold">{stop.stop}</div>
+                <div className="text-sm text-gray-500">
+                  {stop.arrivalTime
+                    ? new Date(stop.arrivalTime).toLocaleTimeString()
+                    : "Not arrived"}
+                </div>
+              </div>
+              {stop.reached === "Next" && !vehicleHistory.completed && (
+                <button
+                  onClick={() => handleUpdateStop(stop.stop)}
+                  disabled={loading}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-blue-300"
+                >
+                  {loading ? "Updating..." : "Mark Reached"}
+                </button>
+              )}
+              <div
+                className={`w-3 h-3 rounded-full ${
+                  stop.reached === "Reached"
+                    ? "bg-green-500"
+                    : stop.reached === "Next"
+                    ? "bg-blue-500"
+                    : stop.reached === "Left"
+                    ? "bg-gray-500"
+                    : "bg-red-500"
+                }`}
+              />
+            </div>
+          ))}
+          {vehicleHistory.completed && (
+            <div className="mt-4 p-4 bg-green-100 text-green-800 rounded">
+              Route Completed!
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Map */}

@@ -499,7 +499,7 @@ const App = () => {
           }
         />
         <Route
-          path="/vehicle-tracking"
+          path="/vehicle-tracking/:id"
           element={
             <Layout>
               <VehicleTrackingPage />
