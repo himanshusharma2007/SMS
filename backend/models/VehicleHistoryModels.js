@@ -6,6 +6,11 @@ const vehicleHistorySchema = new mongoose.Schema({
     ref: 'Vehicle',
     required: true
   }, // Reference to the vehicle
+  driver: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Driver',
+    required: true
+  }, // Reference to the vehicle
   route: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Route',

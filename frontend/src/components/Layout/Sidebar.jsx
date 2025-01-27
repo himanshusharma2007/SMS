@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FaUser,
@@ -6,7 +6,6 @@ import {
   FaNetworkWired,
   FaSignOutAlt,
   FaUserGraduate,
-  FaCheckSquare,
   FaBook,
   FaClipboardCheck,
   FaBars,
@@ -35,7 +34,7 @@ const menuConfig = {
     attendance: ["attendance", "staff-attendance"],
     communication: ["parents", "notices", "connections"],
     finance: ["fee-reminder"],
-    transport: ["transport"],
+    transport: ["transport", "VehicleTrackingPage"],
   },
   superAdmin: {
     main: ["dashboard", "students", "teachers", "staff", "class"],
@@ -43,18 +42,20 @@ const menuConfig = {
     attendance: ["attendance", "staff-attendance"],
     communication: ["notices", "connections"],
     finance: ["fee-reminder"],
-    transport: ["transport"],
+    transport: ["transport", "VehicleTrackingPage"],
   },
   teacher: {
     main: ["dashboard", "students", "class"],
     academic: ["time-table", "assesments", "student-marks", "result"],
     attendance: ["attendance"],
     communication: ["parents", "notices", "live-sessions", "connections"],
+    transport: ["VehicleTrackingPage"],
   },
   student: {
     main: ["dashboard"],
     academic: ["time-table", "assesments", "result"],
     communication: ["notices", "live-sessions"],
+    transport: ["VehicleTrackingPage"],
   },
 };
 
@@ -112,6 +113,11 @@ const menuItems = {
     icon: FaBus,
     label: "School Transportation",
     path: "/transport",
+  },
+  VehicleTrackingPage: {
+    icon: FaBus,
+    label: "School VehicleTrackingPage",
+    path: "/vehicle-histories",
   },
 };
 
@@ -379,7 +385,7 @@ const Sidebar = () => {
       >
         <FaBars className="w-6 h-6" />
       </button>
-    </div> 
+    </div>
   );
 };
 

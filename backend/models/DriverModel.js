@@ -20,6 +20,10 @@ const driverSchema = new mongoose.Schema({
         required: [true, 'Password is required.'],
         select: false,
     },
+    img: {
+        public_id: {type: String, required: true},
+        url: {type: String, required: true},
+    }
 }, {
     timestamps: true, // Adds `createdAt` and `updatedAt` fields
 });

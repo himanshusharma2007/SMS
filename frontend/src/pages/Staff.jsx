@@ -20,6 +20,7 @@ const DashboardPage = () => {
       try {
         const response = await staffServices.getAllStaff();
         const departments = response.data;
+        console.log(departments)
 
         // Calculate total staff across all departments
         const totalStaff = departments.reduce(

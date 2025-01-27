@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   LineChart,
   Line,
@@ -13,30 +13,43 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Clock, BookOpen, Users, ChartBar } from "lucide-react";
-
-// Sample data - replace with your JSON data later
-const sampleAttendanceData = [
-  { month: "Jan", present: 85, absent: 15 },
-  { month: "Feb", present: 88, absent: 12 },
-  { month: "Mar", present: 92, absent: 8 },
-  { month: "Apr", present: 90, absent: 10 },
-];
-
-const sampleMarksData = [
-  { subject: "Math", marks: 85, average: 75 },
-  { subject: "Science", marks: 78, average: 72 },
-  { subject: "English", marks: 88, average: 70 },
-  { subject: "History", marks: 92, average: 78 },
-];
-
-const sampleSubmissionData = [
-  { value: 85, name: "Submitted" },
-  { value: 15, name: "Pending" },
-];
+import { Clock, BookOpen, Users } from "lucide-react";
+import StudentDashboardService from "../services/StudentDashboardService";
+import Loader from "../components/Loader/Loader";
 
 const StudentDashboard = () => {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [dashboardData, setDashboardData] = React.useState({
+    stats: {
+      attendanceRate: { current: 0, percentageChange: 0 },
+      averageGrade: { current: 0, percentageChange: 0 },
+      classRank: { current: 0, percentageChange: 0 },
+      classSize: { current: 0, percentageChange: 0 },
+    },
+    monthlyAttendance: [],
+    academicPerformance: [],
+    submissionStatus: { submitted: 0, pending: 0 },
+  });
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+
+  React.useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const data = await StudentDashboardService.getDashboardData();
+      console.log("Student Dashboard data", data);
+      setDashboardData(data);
+      setError(null);
+    } catch (err) {
+      setError("Failed to fetch dashboard data");
+      console.error("Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const StatCard = ({ icon: Icon, title, value, change }) => (
     <div className="bg-white p-6 rounded-lg shadow-md">
@@ -44,18 +57,47 @@ const StudentDashboard = () => {
         <div>
           <p className="text-gray-600 text-sm">{title}</p>
           <h3 className="text-2xl font-bold mt-2">{value}</h3>
-          <span
-            className={`text-sm ${
-              change >= 0 ? "text-green-500" : "text-red-500"
-            }`}
-          >
-            {change >= 0 ? "↑" : "↓"} {Math.abs(change)}%
-          </span>
+          {change !== 0 && (
+            <span
+              className={`text-sm ${
+                change >= 0 ? "text-green-500" : "text-red-500"
+              }`}
+            >
+              {change >= 0 ? "↑" : "↓"} {Math.abs(change)}%
+            </span>
+          )}
         </div>
         <Icon className="text-blue-500" size={24} />
       </div>
     </div>
   );
+
+  if (loading) return <Loader />;
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-8 flex items-center justify-center">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
+
+  // Transform monthly attendance data to handle string values
+  const transformedAttendanceData = dashboardData.monthlyAttendance.map(
+    (item) => ({
+      ...item,
+      present: parseFloat(item.present),
+      absent: parseFloat(item.absent),
+    })
+  );
+
+  // Handle empty academic performance data
+  const defaultAcademicData = [{ subject: "No Data", marks: 0, average: 0 }];
+
+  // Transform submission status data for pie chart
+  const submissionChartData = [
+    { name: "Submitted", value: dashboardData.submissionStatus.submitted },
+    { name: "Pending", value: dashboardData.submissionStatus.pending },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -72,36 +114,27 @@ const StudentDashboard = () => {
           <StatCard
             icon={Clock}
             title="Attendance Rate"
-            value="92%"
-            change={2.5}
+            value={`${dashboardData.stats.attendanceRate.current}%`}
+            change={dashboardData.stats.attendanceRate.percentageChange}
           />
           <StatCard
             icon={BookOpen}
             title="Average Grade"
-            value="85/100"
-            change={-1.2}
+            value={`${dashboardData.stats.averageGrade.current}/100`}
+            change={dashboardData.stats.averageGrade.percentageChange}
           />
-          <StatCard icon={Users} title="Class Rank" value="#12" change={3} />
-          <StatCard icon={Users} title="Class Size" value="45" change={0} />
-        </div>
-
-        {/* Tabs */}
-        <div className="mb-6">
-          <div className="flex space-x-4 border-b">
-            {["overview", "attendance", "marks", "submissions"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 font-medium ${
-                  activeTab === tab
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
+          <StatCard
+            icon={Users}
+            title="Class Rank"
+            value={`#${dashboardData.stats.classRank.current}`}
+            change={dashboardData.stats.classRank.percentageChange}
+          />
+          <StatCard
+            icon={Users}
+            title="Class Size"
+            value={dashboardData.stats.classSize.current}
+            change={dashboardData.stats.classSize.percentageChange}
+          />
         </div>
 
         {/* Main Content Area */}
@@ -109,31 +142,53 @@ const StudentDashboard = () => {
           {/* Attendance Chart */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-lg font-semibold mb-4">Monthly Attendance</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={sampleAttendanceData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="present" stroke="#3b82f6" />
-                <Line type="monotone" dataKey="absent" stroke="#ef4444" />
-              </LineChart>
-            </ResponsiveContainer>
+            {transformedAttendanceData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={transformedAttendanceData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis domain={[0, 100]} />
+                  <Tooltip />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="present"
+                    stroke="#3b82f6"
+                    name="Present %"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="absent"
+                    stroke="#ef4444"
+                    name="Absent %"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-gray-500">
+                No attendance data available
+              </div>
+            )}
           </div>
 
           {/* Academic Performance */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-lg font-semibold mb-4">Academic Performance</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={sampleMarksData}>
+              <BarChart
+                data={
+                  dashboardData.academicPerformance.length > 0
+                    ? dashboardData.academicPerformance
+                    : defaultAcademicData
+                }
+              >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="subject" />
-                <YAxis />
+                <YAxis domain={[0, 100]} />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="marks" fill="#3b82f6" />
-                <Bar dataKey="average" fill="#93c5fd" />
+                <Bar dataKey="marks" fill="#3b82f6" name="Your Marks" />
+                <Bar dataKey="average" fill="#93c5fd" name="Class Average" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -141,40 +196,35 @@ const StudentDashboard = () => {
           {/* Submission Status */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-lg font-semibold mb-4">Submission Status</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={sampleSubmissionData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  fill="#3b82f6"
-                  label
-                ></Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            {submissionChartData.some((item) => item.value > 0) ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={submissionChartData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="#3b82f6"
+                    label
+                  ></Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-gray-500">
+                No submission data available
+              </div>
+            )}
           </div>
 
           {/* Recent Activity */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-            <div className="space-y-4">
-              {[1, 2, 3].map((item) => (
-                <div
-                  key={item}
-                  className="flex items-center p-3 bg-gray-50 rounded-lg"
-                >
-                  <ChartBar className="text-blue-500 mr-3" size={20} />
-                  <div>
-                    <p className="text-sm font-medium">Assignment Submitted</p>
-                    <p className="text-xs text-gray-500">2 hours ago</p>
-                  </div>
-                </div>
-              ))}
+            <div className="flex items-center justify-center h-[300px] text-gray-500">
+              No recent activity
             </div>
           </div>
         </div>

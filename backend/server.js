@@ -24,6 +24,12 @@ const liveSessionRouter = require("./routes/liveSessionRoutes");
 const testRouter = require("./routes/testRouter");
 const submissionRouter = require("./routes/submissionRouter");
 const dashboardRoutes = require("./routes/adminDashboardRoutes");
+const driverRoutes = require("./routes/driverRoutes");
+const vehicleRoutes = require("./routes/vehicleRoutes");
+const routeRoutes = require("./routes/routeRoutes");
+const vehicleHistoryRoutes = require("./routes/vehicleHistoryRoutes");
+const teacherDashboardRoutes = require("./routes/teacherDashboardRoutes");
+const studentDashboardRoutes = require("./routes/studentDashboardRoutes");
 
 const path = require("path");
 
@@ -31,7 +37,7 @@ require("dotenv").config();
 
 const URL = process.env.DB_URL;
 console.log("process.env.DB_URL", process.env.DB_URL);
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // app.use(express.static(path.join(__dirname, "../frontend/dist")));
 // Middleware
@@ -45,7 +51,7 @@ app.use(cookieParser());
 // );
 app.use(
   cors({
-    origin: ["http://localhost:5173","http://localhost:5174"],
+    origin: ["http://localhost:5173"],
     credentials: true,
   })
 );
@@ -53,6 +59,8 @@ app.use(
 app.use("/api/auth", authRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/teacher-dashboard", teacherDashboardRoutes);
+app.use("/api/student-dashboard", studentDashboardRoutes);
 app.use("/api/student-marks", studentMarksRouter);
 app.use("/api/student-attendance", studentAttendanceRouter);
 app.use("/api/teacher-attendance", teacherAttendanceRouter);
@@ -69,6 +77,11 @@ app.use("/api/staff-attendance", staffAttendanceRouter);
 app.use("/api/live-sessions", liveSessionRouter);
 app.use("/api/tests", testRouter);
 app.use("/api/submission", submissionRouter);
+app.use("/api/driver", driverRoutes);
+app.use("/api/vehicle", vehicleRoutes);
+app.use("/api/vehicle-route", routeRoutes);
+app.use("/api/vehicle-history", vehicleHistoryRoutes);
+
 // app.get("*", (req, res) => {
 //   res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 // });

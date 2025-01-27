@@ -12,9 +12,6 @@ const protect = require("../middlewares/jwtToken");
 const jwtToken = require("../middlewares/jwtToken");
 const checkTeacher = require("../middlewares/checkTeacher");
 
-// Protect all routes - require authentication
-router.use(protect);
-
 // Create new test - only teachers and admins can create tests
 router.post("/",jwtToken, checkTeacher, createTest);
 

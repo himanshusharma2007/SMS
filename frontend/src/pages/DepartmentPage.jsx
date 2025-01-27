@@ -17,6 +17,7 @@ const DepartmentPage = () => {
       try {
         const response = await staffServices.getAllStaff();
         const departmentsData = response.data;
+        console.log(departmentsData)
 
         // Format departments with staff count
         const formattedDepartments = departmentsData.map((dept) => ({
